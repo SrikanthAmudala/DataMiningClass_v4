@@ -1,0 +1,20 @@
+Tue, 03 Dec 2019 22:58:34 - __main__ - INFO - DatasetMICC_F220_bow_600.csv
+Tue, 03 Dec 2019 23:17:19 - __main__ - INFO - Accuracy: MICC_F220_bow_600.csv : 0.5335235378031383
+Tue, 03 Dec 2019 23:17:20 - __main__ - INFO - DatasetMICC_F220_bow_700.csv
+Wed, 04 Dec 2019 10:03:26 - __main__ - INFO - DatasetMICC_F220_bow_200.csv
+Wed, 04 Dec 2019 10:11:22 - __main__ - INFO - DatasetMICC_F220_bow_20.csv
+Wed, 04 Dec 2019 10:16:31 - __main__ - INFO - DatasetMICC_F220_bow_20.csv
+Wed, 04 Dec 2019 10:17:37 - __main__ - INFO - Accuracy: MICC_F220_bow_20.csv : 0.26390870185449355
+Wed, 04 Dec 2019 10:18:12 - __main__ - INFO - DatasetMICC_F220_bow_700.csv
+Wed, 04 Dec 2019 10:24:26 - __main__ - INFO - DatasetMICC_F220_bow_700.csv
+Wed, 04 Dec 2019 10:45:54 - __main__ - INFO - Accuracy: MICC_F220_bow_700.csv : 0.4664764621968616
+Wed, 04 Dec 2019 10:45:54 - __main__ - INFO - DatasetMICC_F220_bow_800.csv
+Wed, 04 Dec 2019 11:09:19 - __main__ - INFO - Accuracy: MICC_F220_bow_800.csv : 0.5349500713266762
+Wed, 04 Dec 2019 11:10:58 - __main__ - INFO - DatasetMICC_F220_bow_500.csv
+Wed, 04 Dec 2019 11:27:12 - __main__ - INFO - Accuracy: MICC_F220_bow_500.csv : 0.4450784593437946
+Wed, 04 Dec 2019 11:27:12 - __main__ - INFO - DatasetMICC_F220_bow_400.csv
+Wed, 04 Dec 2019 11:41:41 - __main__ - INFO - Accuracy: MICC_F220_bow_400.csv : 0.4978601997146933
+Wed, 04 Dec 2019 12:00:34 - __main__ - INFO - DatasetMICC_F220_bow_300.csv
+Wed, 04 Dec 2019 12:09:49 - __main__ - INFO - Accuracy: MICC_F220_bow_300.csv : 0.5035663338088445
+Wed, 04 Dec 2019 12:09:49 - __main__ - INFO - DatasetMICC_F220_bow_200.csv
+Wed, 04 Dec 2019 12:16:09 - __main__ - INFO - Accuracy: MICC_F220_bow_200.csv : 0.4950071326676177
