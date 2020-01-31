@@ -146,7 +146,7 @@ start = datetime.datetime.now()
 results = []
 
 FORMAT = "%(asctime)-15s - %(name)s - %(levelname)s - %(message)s"
-LOG_FILE_PATH = "/home/k_mathin/PycharmProjects/DataMiningClass/logs/selected_targets_sunflower_heli_stop_revolver.txt"
+LOG_FILE_PATH = "/home/k_mathin/PycharmProjects/DataMiningClass/logs/full_obj_classifiation.txt"
 logging.basicConfig(level=logging.DEBUG, filename=LOG_FILE_PATH,
                     format=FORMAT, datefmt="%a, %d %b %Y %H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -488,18 +488,23 @@ def dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk
     return rnk
 
 
-base_path = "/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/object_classification/yin_airpl_m_sun/"
+# base_path = "/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/object_classification/yin_airpl_m_sun/"
+base_path = "/home/k_mathin/PycharmProjects/DataMiningClass_v4/datasets/classification/object_classification/with_targets/"
 
 import os
 
 accuracy_table = []
 for path in os.listdir(base_path):
     consider_files = [
-                      "target_6_4_101_91_MICC_F220_bow_200.csv",
-                      "target_6_4_101_91_MICC_F220_bow_800.csv"
-                      "target_6_4_101_91_MICC_F220_bow_400.csv",
-                      "target_6_4_101_91_MICC_F220_bow_90.csv",
-                      "target_6_4_101_91_MICC_F220_bow_300.csv"
+                    "MICC_F220_bow_200.csv",
+                    "MICC_F220_bow_800.csv",
+                    "MICC_F220_bow_700.csv",
+                    "MICC_F220_bow_600.csv",
+                    "MICC_F220_bow_400.csv",
+                    "MICC_F220_bow_500.csv",
+                    "MICC_F220_bow_90.csv",
+                    "MICC_F220_bow_300.csv"
+                    # "MICC_F220_bow_10.csv"
                       ]
     if path in consider_files:
         # if path in ["MICC_F220_bow_20.csv"]:
@@ -514,74 +519,74 @@ for path in os.listdir(base_path):
         k = len(np.unique(y))
         X = np.asarray(X)
         y = np.asarray(y)
+        #
+        # skf = StratifiedKFold(n_splits=4)
+        # skf.get_n_splits(X, y)
+        # accuracy_list = []
 
-        skf = StratifiedKFold(n_splits=4)
-        skf.get_n_splits(X, y)
-        accuracy_list = []
+    # for train_index, test_index in skf.split(X, y):
+        # print("TRAIN:", train_index, "TEST:", test_index)
+        # X_train, X_test = X[train_index], X[test_index]
+        # y_train, y_test = y[train_index], y[test_index]
 
-        for train_index, test_index in skf.split(X, y):
-            # print("TRAIN:", train_index, "TEST:", test_index)
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15)
 
-            # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+        X_train = np.asarray(X_train)
+        X_test = np.asarray(X_test)
+        y_train = np.asarray(y_train)
+        y_test = np.asarray(y_test)
 
-            X_train = np.asarray(X_train)
-            X_test = np.asarray(X_test)
-            y_train = np.asarray(y_train)
-            y_test = np.asarray(y_test)
+        d = X_train.shape[-1]
 
-            d = X_train.shape[-1]
+        z_list = []
+        alpthak_list = []
+        betak_list = []
+        mk_list = []
+        gammak_list = []
+        sk_list = []
+        print("Dataset: ", path)
+        logger.info("Dataset" + path)
 
-            z_list = []
-            alpthak_list = []
-            betak_list = []
-            mk_list = []
-            gammak_list = []
-            sk_list = []
-            print("Dataset: ", path)
-            logger.info("Dataset" + path)
+        maximum = d
+        limit = 100
+        while (maximum > 0):
+            pool = multiprocessing.Pool(limit)
+            print("Remaining Dimensions: ", maximum)
+            for dim in range(d):
+                # print(dim)
+                if dim < limit:
+                    pool.apply_async(dim_calc, args=(
+                        dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list),
+                                     callback=collect_result)
+                    # rnk = dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list)
 
-            maximum = d
-            limit = 100
-            while (maximum > 0):
-                pool = multiprocessing.Pool(limit)
-                print("Remaining Dimensions: ", maximum)
-                for dim in range(d):
-                    # print(dim)
-                    if dim < limit:
-                        pool.apply_async(dim_calc, args=(
-                            dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list),
-                                         callback=collect_result)
-                        # rnk = dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list)
+                    # z_list.append(rnk)
+            #
+            pool.close()
+            pool.join()
+            # limit +=100
+            maximum = maximum - limit
 
-                        # z_list.append(rnk)
-                #
-                pool.close()
-                pool.join()
-                # limit +=100
-                maximum = maximum - limit
+        z_list = np.asarray(results).sum(axis=0)
+        # z_list = np.asarray(results).prod(axis=0)
+        results.clear()
+        rnk = list(z_list)
+        rnk = [list(i) for i in rnk]
+        result = []
 
-            z_list = np.asarray(results).sum(axis=0)
-            # z_list = np.asarray(results).prod(axis=0)
-            results.clear()
-            rnk = list(z_list)
-            rnk = [list(i) for i in rnk]
-            result = []
+        for response in rnk:
+            maxResp = max(response)
+            respmax = response.index(maxResp)
+            result.append(respmax)
 
-            for response in rnk:
-                maxResp = max(response)
-                respmax = response.index(maxResp)
-                result.append(respmax)
+        result = np.asarray(result)
+        accuracy = metrics.accuracy_score(y_test, result)
+        print("Accuracy: " + path, accuracy)
+        logger.info("Accuracy: " + path + " : " + str(accuracy))
+        # accuracy_table.append([path, accuracy])
 
-            result = np.asarray(result)
-            accuracy = metrics.accuracy_score(y_test, result)
-            print("Accuracy: " + path, accuracy)
-            logger.info("Accuracy: " + path + " : " + str(accuracy))
-            accuracy_table.append([path, accuracy])
+        # accuracy_list.append(accuracy)
 
-            accuracy_list.append(accuracy)
-
-        accuracy_list = np.asarray(accuracy_list)
-        print("Final Accuracy: " + path, accuracy_list.mean())
-        logger.info("K-fold_Accuracy: " + path + " : " + str(accuracy_list.mean()))
+        # accuracy_list = np.asarray(accuracy_list)
+        # print("Final Accuracy: " + path, accuracy_list.mean())
+        # logger.info("K-fold_Accuracy: " + path + " : " + str(accuracy_list.mean()))

@@ -146,7 +146,7 @@ start = datetime.datetime.now()
 results = []
 
 FORMAT = "%(asctime)-15s - %(name)s - %(levelname)s - %(message)s"
-LOG_FILE_PATH = "/home/k_mathin/PycharmProjects/DataMiningClass/logs/selected_targets_sunflower_heli_stop_revolver.txt"
+LOG_FILE_PATH = "/home/k_mathin/PycharmProjects/DataMiningClass_v4/logs/selected_targets_sunflower_heli_stop_revolver.txt"
 logging.basicConfig(level=logging.DEBUG, filename=LOG_FILE_PATH,
                     format=FORMAT, datefmt="%a, %d %b %Y %H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -488,7 +488,7 @@ def dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk
     return rnk
 
 
-base_path = "/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/object_classification/yin_airpl_m_sun/"
+base_path = "/home/k_mathin/PycharmProjects/DataMiningClass_v4/datasets/classification/object_classification/yin_airpl_m_sun/"
 
 import os
 
