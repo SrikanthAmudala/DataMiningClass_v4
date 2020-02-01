@@ -2,7 +2,7 @@ import time
 import copy
 import numpy as np
 from numpy.linalg import inv, det, slogdet
-from utils import *
+from IAGM_master.utils import *
 
 
 class Sample:
