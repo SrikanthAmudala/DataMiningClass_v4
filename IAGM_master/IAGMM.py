@@ -259,6 +259,10 @@ def infinte_mixutre_model(X, Nsamples=500, Nint=50, anneal=False):
 
         # sort out based on new stochastic indicators
         nij = np.sum(c == M)  # see if the *new* component has occupancy
+
+        print("Nij: ", nij)
+        print("shape of c: ",np.unique(c))
+
         if nij > 0:
             # draw from priors and increment M
             newmu = np.array([np.squeeze(draw_normal(lam[k], 1 / r[k])) for k in range(D)])

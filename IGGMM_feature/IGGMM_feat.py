@@ -17,8 +17,9 @@ from scipy.special import digamma
 from scipy.special import gamma
 from sklearn.cluster import KMeans
 
-
 from matplotlib import pyplot
+
+
 # from IGGMM_feature.clustering import *
 
 
@@ -157,6 +158,7 @@ x = x.reshape(-1)
 # z = y_train
 z = []
 k = 1
+
 alpha0 = np.asarray([x.mean() ** 2 / x.var() for _ in range(k)])
 beta0 = np.asarray([x.mean() / i for i in alpha0])
 shape = np.asarray([2 for _ in range(k)])
@@ -171,11 +173,13 @@ for i, j in zip(resp, temp):
     j[i] = 1
     z.append(j)
 
-c = np.asarray(z).reshape(-1,1)
+c = np.asarray(z).reshape(-1, k)
 n = np.zeros(1)
 # z = np.array([np.random.dirichlet(np.ones(k)) for _ in range(len(x))])
 rnk = np.exp(z) / np.reshape(np.exp(z).sum(axis=1), (-1, 1))
+
 Nk = rnk.sum(axis=0)
+
 sk = s0 + 2 * Nk * (alpha0 / beta0)
 
 test_mk_num = c.copy()
@@ -188,7 +192,9 @@ e_precision_ = alpha0 / beta0
 e_x_mean_lambda_ = c.copy()
 shape = np.asarray([2 for _ in range(k)])
 gammak = gama0 + Nk
+
 alphak = Nk / 2 + alpha0 - 1
+
 betak = beta0 + (rnk * e_x_mean_lambda_).sum(axis=0)
 
 e_ln_pi = e_ln_pi_k(gammak, Nk)
@@ -228,9 +234,11 @@ oldpcnt = 0
 
 no_of_iterations = 0
 z = np.zeros(N)
+# Nsamples = 1
+
 
 while no_of_iterations < Nsamples:
-    c = c.reshape(-1,1)
+    c = c.reshape(-1, 1)
     epsolon = mk
     var_test = sk
     epsolon_in = np.exp(
@@ -392,7 +400,7 @@ while no_of_iterations < Nsamples:
     #
     # # the observations belonged to class j
 
-    X_reshape = X.reshape(-1,1)
+    X_reshape = X.reshape(-1, 1)
     Xj = [X_reshape[np.where(z == j), :] for j, nj in enumerate(n)]
 
     # mu_cache = mu
@@ -404,7 +412,6 @@ while no_of_iterations < Nsamples:
     Calculate your mean and sk normal way
     """
 
-
     # draw lambda from posterior (depends on mu, M, and r), eq 5 (Rasmussen 2000)
 
     """
@@ -414,7 +421,6 @@ while no_of_iterations < Nsamples:
     # draw alpha from posterior (depends on number of components M, number of observations N), eq 15 (Rasmussen 2000)
     # Because its not standard form, using ARS to sampling
     alpha = draw_alpha(M, N)
-
 
     """
     Finished until alpha part, check the idx and include the idx> part
@@ -446,24 +452,49 @@ while no_of_iterations < Nsamples:
 
     # sort out based on new stochastic indicators
     nij = np.sum(c == M)  # see if the *new* component has occupancy
-    print("NIJ: ",nij)
+    print("NIJ: ", nij)
 
-
-    """
     if nij > 0:
         # draw from priors and increment M
-        newmu = np.array([np.squeeze(draw_normal(lam[k], 1 / r[k])) for k in range(D)])
-        news_l = np.array([np.squeeze(draw_gamma(beta_l[k] / 2, 2 / (beta_l[k] * w_l[k]))) for k in range(D)])
-        news_r = np.array([np.squeeze(draw_gamma(beta_r[k] / 2, 2 / (beta_r[k] * w_r[k]))) for k in range(D)])
-        mu = np.concatenate((mu, np.reshape(newmu, (1, D))))
-        s_l = np.concatenate((s_l, np.reshape(news_l, (1, D))))
-        s_r = np.concatenate((s_r, np.reshape(news_r, (1, D))))
-        
-        
+        newmu = np.array([np.squeeze(draw_normal(mk, 1 / sk))])
+        new_sk = np.array([np.squeeze(draw_gamma(alphak, betak))])
+        mk = np.concatenate((mk, np.reshape(newmu, -1)))
+        sk = np.concatenate((sk, np.reshape(new_sk, -1)))
+        shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
+
+
+        #
+        # mk = np.concatenate((mk np.reshape(newmu, (1, D))))
+        # s_l = np.concatenate((s_l, np.reshape(news_l, (1, D))))
+        # s_r = np.concatenate((s_r, np.reshape(news_r, (1, D))))
+
         M = M + 1
+    k = M
+    rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
+    Nk = rnk.sum(axis=0)
+    alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
+    betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
+
+    term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
+
+    term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
+        axis=1)
+    row_in_e = np.exp(term1 - term2)
+
+
+
+
+    temp = np.zeros((len(x), k))
+    z_for_c = []
+    for i, j in zip(c, temp):
+        j[int(i)] = 1
+        z_for_c.append(j)
+    z_for_c = np.asarray(z_for_c)
+    temp_c_holder = c.copy()
+    c = z_for_c
 
     # find the associated number for every components
-    n = np.array([np.sum(c == j) for j in range(M)])
+    n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
 
     # find unrepresented components
     badidx = np.argwhere(n == 0)
@@ -471,17 +502,17 @@ while no_of_iterations < Nsamples:
 
     # remove unrepresented components
     if Nbad > 0:
-        mu = np.delete(mu, badidx, axis=0)
-        s_l = np.delete(s_l, badidx, axis=0)
-        s_r = np.delete(s_r, badidx, axis=0)
+        mk = np.delete(mk, badidx, axis=0)
+        sk = np.delete(sk, badidx, axis=0)
+        # s_r = np.delete(s_r, badidx, axis=0)
         # if the unrepresented compont removed is in the middle, make the sequential component indicators change
         for cnt, i in enumerate(badidx):
-            idx = np.argwhere(c >= (i - cnt))
-            c[idx] = c[idx] - 1
+            idx = np.argwhere(temp_c_holder >= (i - cnt))
+            temp_c_holder[idx] = temp_c_holder[idx] - 1
         M -= Nbad  # update component number
-    """
+
     # recompute n
-    n = np.array([np.sum(c == j) for j in range(M)])
+    n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
 
     # recompute pi
     pi = n.astype(float) / np.sum(n)
@@ -495,7 +526,7 @@ while no_of_iterations < Nsamples:
     # S = Sample(mu, s_l, s_r, pi, lam, r, beta_l, beta_r, w_l, w_r, alpha, M)
     # newS = copy.deepcopy(S)
     # Samp.addsample(newS)
-    no_of_iterations+=1
+    no_of_iterations += 1
     # print(n)
 
 # return Samp, X, c, n
