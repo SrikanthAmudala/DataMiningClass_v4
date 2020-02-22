@@ -141,12 +141,18 @@ from sklearn.model_selection import StratifiedKFold
 import datetime
 import multiprocessing
 import logging
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+
+
+
 
 start = datetime.datetime.now()
 results = []
 
 FORMAT = "%(asctime)-15s - %(name)s - %(levelname)s - %(message)s"
 LOG_FILE_PATH = "/home/k_mathin/PycharmProjects/DataMiningClass_v4/logs/selected_targets_sunflower_heli_stop_revolver.txt"
+LOG_FILE_PATH = "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/logs/selected_targets_sunflower_heli_stop_revolver.txt"
 logging.basicConfig(level=logging.DEBUG, filename=LOG_FILE_PATH,
                     format=FORMAT, datefmt="%a, %d %b %Y %H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -488,22 +494,27 @@ def dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk
     return rnk
 
 
-base_path = "/home/k_mathin/PycharmProjects/DataMiningClass_v4/datasets/classification/object_classification/yin_airpl_m_sun/"
+# base_path = "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/classification/object_classification/yin_airpl_m_sun/"
+base_path = "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/classification/aero_bike/with_targets/"
 
 import os
 
 accuracy_table = []
 for path in os.listdir(base_path):
-    consider_files = [
-                      "target_6_4_101_91_MICC_F220_bow_90.csv",
-                      "target_6_4_101_91_MICC_F220_bow_100.csv",
-                      "target_6_4_101_91_MICC_F220_bow_200.csv",
-                      "target_6_4_101_91_MICC_F220_bow_300.csv",
-                      "target_6_4_101_91_MICC_F220_bow_400.csv",
-                      "target_6_4_101_91_MICC_F220_bow_500.csv",
-                      "target_6_4_101_91_MICC_F220_bow_600.csv",
-                      "target_6_4_101_91_MICC_F220_bow_700.csv",
-                      "target_6_4_101_91_MICC_F220_bow_800.csv"]
+    # consider_files = [
+    #                   "target_6_4_101_91_MICC_F220_bow_90.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_100.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_200.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_300.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_400.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_500.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_600.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_700.csv",
+    #                   "target_6_4_101_91_MICC_F220_bow_800.csv"]
+    #
+
+
+    consider_files = ["MICC_F220_bow_200.csv"]
     if path in consider_files:
         # if path in ["MICC_F220_bow_20.csv"]:
 
@@ -517,6 +528,9 @@ for path in os.listdir(base_path):
         k = len(np.unique(y))
         X = np.asarray(X)
         y = np.asarray(y)
+        labels = ['Yin Yang', 'Aeroplan', 'Motor Bike', 'Sun Flower']
+        n_classes = len(labels)
+
         #
         # skf = StratifiedKFold(n_splits=4)
         # skf.get_n_splits(X, y)
@@ -583,6 +597,8 @@ for path in os.listdir(base_path):
         logger.info("Accuracy: " + path + " : " + str(accuracy))
         accuracy_table.append([path, accuracy])
 
+
+        print(classification_report(y_test, result, target_names=labels))
 #     accuracy_list.append(accuracy)
 #
 #

@@ -119,3 +119,71 @@ Wed, 04 Dec 2019 19:24:02 - __main__ - INFO - Accuracy: target_6_4_101_91_MICC_F
 Wed, 04 Dec 2019 19:24:02 - __main__ - INFO - Datasettarget_6_4_101_91_MICC_F220_bow_300.csv
 Wed, 04 Dec 2019 19:24:42 - __main__ - INFO - Accuracy: target_6_4_101_91_MICC_F220_bow_300.csv : 0.6333333333333333
 Wed, 04 Dec 2019 19:24:42 - __main__ - INFO - K-fold_Accuracy: target_6_4_101_91_MICC_F220_bow_300.csv : 0.7291666666666666
+Fri, 14 Feb 2020 18:17:13 - __main__ - INFO - Datasettarget_6_4_101_91_MICC_F220_bow_200.csv
+Fri, 14 Feb 2020 18:19:38 - __main__ - INFO - Accuracy: target_6_4_101_91_MICC_F220_bow_200.csv : 0.75
+Fri, 14 Feb 2020 19:04:00 - matplotlib.font_manager - DEBUG - findfont: Matching :family=sans-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0 to DejaVu Sans ('/Users/Srikanth/anaconda/lib/python3.5/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.font_manager - DEBUG - findfont: Matching :family=sans-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=12.0 to DejaVu Sans ('/Users/Srikanth/anaconda/lib/python3.5/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:04:00 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:05:50 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:05:50 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:05:50 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:05:51 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:06:46 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:06:46 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:07:29 - matplotlib.axes._base - DEBUG - update_title_pos
+Fri, 14 Feb 2020 19:59:44 - __main__ - INFO - DatasetMICC_F220_bow_200.csv
+Fri, 14 Feb 2020 20:02:31 - __main__ - INFO - Accuracy: MICC_F220_bow_200.csv : 0.9

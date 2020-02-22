@@ -1,8 +1,8 @@
 import argparse
 import time
 import sys
-from IAGM_master.IAGMM import infinte_mixutre_model
-from IAGM_master.plot_result import plot_result
+from IAGMM import infinte_mixutre_model
+from plot_result import plot_result
 import pandas as pd
 
 # the maximum positive integer for use in setting the ARS seed
@@ -15,10 +15,9 @@ def parser():
     # arguments for reading in a data file
     parser.add_argument('-i', '--inputfile', type=str, default=None, help='the input file name')
     # arguments for sampling number
-    parser.add_argument('-n', '--Nsamples', type=int, default=500, help='the number of gibbs samples to produce')
+    parser.add_argument('-n', '--Nsamples', type=int, default=1000, help='the number of gibbs samples to produce')
     # general analysis parameters
     parser.add_argument('-I', '--Nint', type=int, default=50, help='the number of samples used in approximating the tricky integral')
-    parser.add_argument('-a', '--anneal', action='count', default=0, help='perform simulated annealing')
 
     # catch any input errors   
     args = parser.parse_args()
@@ -53,18 +52,15 @@ def main():
     # record the start time
     t = time.time()
 
-    # # get the command line args
-    # args = parser()
-    #
-    # # read in data if required
-    # if args.inputfile:
-    #     Y = readdata(args.inputfile)
+    # get the command line args
+    args = parser()
 
-    Y = readdata("/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/IAGM_master/datasets/MVN_4components_diagonal_cov.csv")
+    # read in data if required
+    if args.inputfile:
+        Y = readdata(args.inputfile)
+
     # call igmm Gibbs sampler
-    # Samp, Y, c, n = infinte_mixutre_model(Y, Nsamples=args.Nsamples, Nint=args.Nint,
-    #                                 anneal=args.anneal)
-    Samp, Y, c, n = infinte_mixutre_model(Y)
+    Samp, Y, c, n = infinte_mixutre_model(Y, Nsamples=args.Nsamples, Nint=args.Nint,)
 
     # print computation time
     print("{}: time to complete main analysis = {} sec".format(time.asctime(), time.time() - t))
@@ -76,12 +72,10 @@ def main():
     print('{}: success'.format(time.asctime())  )
 
 
-# if __name__ == "__main__":
-#     exit(main())
+if __name__ == "__main__":
+    exit(main())
 
 
-if __name__ == '__main__':
-    main()
 
 
 

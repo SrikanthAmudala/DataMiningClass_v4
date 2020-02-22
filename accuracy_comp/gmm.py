@@ -17,11 +17,13 @@ from sklearn.model_selection import StratifiedKFold
 
 
 file_path_200f = "/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/object_classification/yin_airpl_m_sun/target_6_4_101_91_MICC_F220_bow_200.csv"
+
+caltech_binary = '/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/classification/aero_bike/with_targets/MICC_F220_bow_200.csv'
 #
-data = pandas.read_csv("/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/heart.csv",
-                       header=None,
-                       skiprows=1)
-# data = pandas.read_csv(file_path_200f, header=None, skiprows=1)
+# data = pandas.read_csv("/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/heart.csv",
+#                        header=None,
+#                        skiprows=1)
+data = pandas.read_csv(caltech_binary, header=None, skiprows=1)
 
 X = data.iloc[:, 0:len(data.keys()) - 1]  # slicing: all rows and 1 to 4 cols
 # store response vector in "y"
@@ -48,7 +50,8 @@ for train_index, test_index in skf.split(X, y):
 
     # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 
-    mixture_model = GaussianMixture(n_components=k)
+    # mixture_model = GaussianMixture(n_components=k)
+    mixture_model = BayesianGaussianMixture(n_components=k)
     mixture_model.fit(X_train, y_train)
     predictions = mixture_model.predict(X_test)
 

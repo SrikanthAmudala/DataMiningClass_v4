@@ -14,7 +14,12 @@ from scipy.special import gamma
 from sklearn import metrics
 from sklearn.model_selection import StratifiedKFold
 import datetime
-start  = datetime.datetime.now()
+from sklearn.metrics import confusion_matrix
+
+from sklearn.metrics import classification_report
+
+start = datetime.datetime.now()
+
 
 # E[ln pik]
 def e_ln_pi_k(gama0, Nk):
@@ -74,9 +79,10 @@ import pandas
 # y = np.asarray(y)
 
 #
-data = pandas.read_csv("/home/k_mathin/PycharmProjects/DataMiningClass/datasets/classification/heart.csv",
-                       header=None,
-                       skiprows=1)
+data = pandas.read_csv(
+    "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/classification/heart.csv",
+    header=None,
+    skiprows=1)
 
 X = data.iloc[:, 0:13]  # slicing: all rows and 1 to 4 cols
 # store response vector in "y"
@@ -147,10 +153,12 @@ def dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk
     e_precision_ = alphak / betak
 
     # Feature
+
     term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
     term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(axis=1)
 
-    row_in_e = np.exp(term1 - term2)
+    row_in_e = np.exp(term1 - term2)  # Eq. 24
+
     w = np.asarray([1 for _ in range(k)])
 
     epsolon = mk
@@ -354,9 +362,12 @@ def dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk
     rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
     return rnk
 
+
 import multiprocessing
 
 results = []
+
+
 def collect_result(result):
     global results
     results.append(result)
@@ -388,7 +399,9 @@ for train_index, test_index in skf.split(X, y):
 
     for dim in range(d):
         print(dim)
-        pool.apply_async(dim_calc, args=(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list), callback=collect_result)
+        pool.apply_async(dim_calc, args=(
+            dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list),
+                         callback=collect_result)
         # rnk = dim_calc(dim, X_train, X_test, y_train, y_test, alpthak_list, betak_list, mk_list, gammak_list, sk_list)
 
         # z_list.append(rnk)
@@ -418,5 +431,5 @@ for train_index, test_index in skf.split(X, y):
 
 accuracy_list = np.asarray(accuracy_list)
 print("Final Accuracy: ", accuracy_list.mean())
-totaltime =  datetime.datetime.now() - start
-print("Ttoal: ",totaltime)
+totaltime = datetime.datetime.now() - start
+print("Ttoal: ", totaltime)

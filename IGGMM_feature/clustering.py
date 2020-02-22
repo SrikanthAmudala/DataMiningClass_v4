@@ -1,6 +1,5 @@
 """
-Feature selection 55 features
-https://archive.ics.uci.edu/ml/datasets/Covertype
+GGMM WITH FEATURE SELECTION
 """
 import matplotlib.pyplot as plt
 import math
@@ -119,7 +118,7 @@ X = cv2.imread(input_img_path, 0)
 # X = data.iloc[:, 0:13]  # slicing: all rows and 1 to 4 cols
 # # store response vector in "y"
 # y = data.iloc[:, 13]
-k = 2
+k = 1
 x = np.asarray(X)
 # y = np.asarray(y)
 #
@@ -130,7 +129,7 @@ x = np.asarray(X)
 o_shape = x.shape
 x = x.reshape(-1)
 # z = y_train
-z = []
+c = []
 alpha0 = np.asarray([x.mean() ** 2 / x.var() for _ in range(k)])
 beta0 = np.asarray([x.mean() / i for i in alpha0])
 shape = np.asarray([2 for _ in range(k)])
@@ -139,27 +138,27 @@ m0, s0, gama0, resp = initilization(k, x)
 pyplot.imshow(resp.reshape(o_shape))
 pyplot.show()
 temp = np.zeros((len(x), k))
-z = []
+c = []
 import pandas
 
 for i, j in zip(resp, temp):
     j[i] = 1
-    z.append(j)
+    c.append(j)
 
-z = np.asarray(z)
+c = np.asarray(c)
 # z = np.array([np.random.dirichlet(np.ones(k)) for _ in range(len(x))])
-rnk = np.exp(z) / np.reshape(np.exp(z).sum(axis=1), (-1, 1))
+rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
 Nk = rnk.sum(axis=0)
 sk = s0 + 2 * Nk * (alpha0 / beta0)
 
-test_mk_num = z.copy()
-test_mk_den = z.copy()
+test_mk_num = c.copy()
+test_mk_den = c.copy()
 
 mk = m0.copy()
 
 e_precision_ = alpha0 / beta0
 
-e_x_mean_lambda_ = z.copy()
+e_x_mean_lambda_ = c.copy()
 shape = np.asarray([2 for _ in range(k)])
 gammak = gama0 + Nk
 alphak = Nk / 2 + alpha0 - 1
@@ -181,7 +180,7 @@ w = np.asarray([1 for _ in range(k)])
 
 no_of_iterations = 0
 
-while no_of_iterations < 10:
+while no_of_iterations < 1:
 
     epsolon = mk
     var_test = sk
@@ -316,10 +315,10 @@ while no_of_iterations < 10:
 
     for i in range(k):
         p1 = e_ln_pi[i] + (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
-        z[:, i] = (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
+        c[:, i] = (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
 
-    z1_num = np.exp(z)
-    z1_den = np.reshape(np.exp(z).sum(axis=0), (-1, 1)).T
+    z1_num = np.exp(c)
+    z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
 
     # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
     rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
@@ -361,12 +360,12 @@ while no_of_iterations < 10:
         p3 = (1 / 2) * np.log(1 / var_test[i]) + np.log(2) - np.log(2 * gamma(1 / 2)) - p3_3 * (
                 x - epsolon[i]) ** 2
         p4 = e_ln_pi[i] + p2 + (1 - fik[:, i]) * p3
-        z[:, i] = p4
+        c[:, i] = p4
 
     # np.seterr(divide='ignore', invalid='ignore')
     # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
-    z1_num = np.exp(z)
-    z1_den = np.reshape(np.exp(z).sum(axis=0), (-1, 1)).T
+    z1_num = np.exp(c)
+    z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
 
     # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
     rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)

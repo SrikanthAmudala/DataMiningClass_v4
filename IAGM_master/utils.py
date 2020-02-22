@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import gamma, invgamma, wishart, norm
 from scipy.stats import multivariate_normal as mv_norm
 from scipy import special
-from ars import ARS
+from IAGM_master.ars import ARS
 import mpmath
 from numba import jit
 

@@ -16,10 +16,11 @@ def compare_s_ljk(s_ljk, previous_s_ljk, s_rjk, nj, beta, w, sum):
     s_rjk = mpmath.mpf(s_rjk)
     a1 = mpmath.power(s_ljk, -0.5) + mpmath.power(s_rjk, -0.5)
     a2 = mpmath.power(previous_s_ljk, -0.5) + mpmath.power(s_rjk, -0.5)
-    ratio_a = a2/a1
+    ratio_a = a2 / a1
     ratio_a_power = np.power(ratio_a, nj)
-    ratio_b = mpmath.power(s_ljk, (beta/2-1)) * mpmath.exp(-0.5*s_ljk*sum) * mpmath.exp(-0.5*w*beta*s_ljk) \
-            / (mpmath.power(previous_s_ljk, (beta/2-1)) * mpmath.exp(-0.5*previous_s_ljk*sum) * mpmath.exp(-0.5*w*beta*previous_s_ljk))
+    ratio_b = mpmath.power(s_ljk, (beta / 2 - 1)) * mpmath.exp(-0.5 * s_ljk * sum) * mpmath.exp(-0.5 * w * beta * s_ljk) \
+              / (mpmath.power(previous_s_ljk, (beta / 2 - 1)) * mpmath.exp(-0.5 * previous_s_ljk * sum) * mpmath.exp(
+        -0.5 * w * beta * previous_s_ljk))
     return ratio_a_power * ratio_b
 
 
@@ -36,7 +37,7 @@ def Metropolis_Hastings_Sampling_posterior_sljk(s_ljk, s_rjk, nj, beta, w, sum):
         alpha = min([1., compare_s_ljk(candidate, x, s_rjk, nj, beta, w, sum)])
         # alpha = min([1., posterior_distribution_s_ljk(candidate, s_rjk, nj, beta, w, sum)/
         #              posterior_distribution_s_ljk(x, s_rjk, nj, beta, w, sum)])
-        u = np.random.uniform(0,1)
+        u = np.random.uniform(0, 1)
         if u < alpha:
             x = candidate
             vec.append(x)
@@ -49,10 +50,11 @@ def compare_s_rjk(s_rjk, previous_s_rjk, s_ljk, nj, beta, w, sum):
     s_rjk = mpmath.mpf(s_rjk)
     a1 = mpmath.power(s_ljk, -0.5) + mpmath.power(s_rjk, -0.5)
     a2 = mpmath.power(s_ljk, -0.5) + mpmath.power(previous_s_rjk, -0.5)
-    ratio_a = a2/a1
+    ratio_a = a2 / a1
     ratio_a_power = np.power(ratio_a, nj)
-    ratio_b = mpmath.power(s_rjk, (beta/2-1)) * mpmath.exp(-0.5*s_rjk*sum) * mpmath.exp(-0.5*w*beta*s_rjk) \
-            / (mpmath.power(previous_s_rjk, (beta/2-1)) * mpmath.exp(-0.5*previous_s_rjk*sum) * mpmath.exp(-0.5*w*beta*previous_s_rjk))
+    ratio_b = mpmath.power(s_rjk, (beta / 2 - 1)) * mpmath.exp(-0.5 * s_rjk * sum) * mpmath.exp(-0.5 * w * beta * s_rjk) \
+              / (mpmath.power(previous_s_rjk, (beta / 2 - 1)) * mpmath.exp(-0.5 * previous_s_rjk * sum) * mpmath.exp(
+        -0.5 * w * beta * previous_s_rjk))
     return ratio_a_power * ratio_b
 
 
@@ -69,80 +71,94 @@ def Metropolis_Hastings_Sampling_posterior_srjk(s_ljk, s_rjk, nj, beta, w, sum):
         alpha = min([1., compare_s_rjk(candidate, x, s_ljk, nj, beta, w, sum)])
         # alpha = min([1., posterior_distribution_s_rjk(candidate, s_ljk, nj, beta, w, sum)/
         #              posterior_distribution_s_rjk(x, s_ljk, nj, beta, w, sum)])
-        u = np.random.uniform(0,1)
+        u = np.random.uniform(0, 1)
         if u < alpha:
             x = candidate
             vec.append(x)
     return vec[-1]
 
 
-@jit(nogil=True,)
+@jit(nogil=True, )
 def Asymmetric_Gassian_Distribution_pdf(x_k, mu_jk, s_ljk, s_rjk):
     y_k = np.zeros(x_k.shape[0])
     for i, xik in enumerate(x_k):
         if xik < mu_jk:
-            y_k[i] = np.sqrt(2/np.pi)/(np.power(s_ljk, -0.5) + np.power(s_rjk, -0.5))\
-                   * np.exp(- 0.5 * s_ljk * (xik- mu_jk)**2)
+            y_k[i] = np.sqrt(2 / np.pi) / (np.power(s_ljk, -0.5) + np.power(s_rjk, -0.5)) \
+                     * np.exp(- 0.5 * s_ljk * (xik - mu_jk) ** 2)
         else:
-            y_k[i] = np.sqrt(2/np.pi)/(np.power(s_ljk, -0.5) + np.power(s_rjk, -0.5))\
-                   * np.exp(- 0.5 * s_rjk * (xik- mu_jk)**2)
+            y_k[i] = np.sqrt(2 / np.pi) / (np.power(s_ljk, -0.5) + np.power(s_rjk, -0.5)) \
+                     * np.exp(- 0.5 * s_rjk * (xik - mu_jk) ** 2)
     return y_k
 
 
-def integral_approx(X, lam, r, beta_l, beta_r, w_l, w_r, size=20):
+from scipy.special import gamma as gamma_pdf
+
+
+def Generalized_Gaussin_PDF(x_k, mk, sk, shape):
+    y_k = np.zeros(x_k.shape[0])
+    for i, xik in enumerate(x_k):
+        y_k[i] = (shape * np.power(sk, 1 / shape)) / (2 * gamma_pdf(1 / shape)) * np.exp(
+            -sk * np.power(np.abs(xik - mk), shape))
+
+    return y_k
+
+
+def integral_approx(X, mk, sk, shape, size=20):
     """
     estimates the integral, eq 17 (Rasmussen 2000)
     """
-    N, D = X.shape
+    # N, D = X.shape
     temp = np.zeros(len(X))
     i = 0
     while i < size:
         # mu = np.array([np.squeeze(norm.rvs(loc=lam[k], scale=1/r[k], size=1)) for k in range(D)])
-        mu = draw_MVNormal(mean=lam, cov=1/r)
-        s_l = np.array([np.squeeze(draw_gamma(beta_l[k] / 2, 2 / (beta_l[k] * w_l[k]))) for k in range(D)])
-        s_r = np.array([np.squeeze(draw_gamma(beta_r[k] / 2, 2 / (beta_r[k] * w_r[k]))) for k in range(D)])
+        # mu = draw_MVNormal(mean=lam, cov=1 / r)
+        # s_l = np.array([np.squeeze(draw_gamma(beta_l[k] / 2, 2 / (beta_l[k] * w_l[k]))) for k in range(D)])
+        # s_r = np.array([np.squeeze(draw_gamma(beta_r[k] / 2, 2 / (beta_r[k] * w_r[k]))) for k in range(D)])
+
+
         ini = np.ones(len(X))
-        for k in range(D):
-            temp_para = Asymmetric_Gassian_Distribution_pdf(X[:, k], mu[k], s_l[k], s_r[k])
-            ini *= temp_para
+        # for k in range(D):
+        temp_para = Generalized_Gaussin_PDF(X, mk, sk, shape)
+        ini *= temp_para
         temp += ini
         i += 1
-    return temp/float(size)
+    return temp / float(size)
 
 
 def log_p_alpha(alpha, k, N):
     """
     the log of eq 15 (Rasmussen 2000)
     """
-    return (k - 1.5)*np.log(alpha) - 0.5/alpha + special.gammaln(alpha) - special.gammaln(N + alpha)
+    return (k - 1.5) * np.log(alpha) - 0.5 / alpha + special.gammaln(alpha) - special.gammaln(N + alpha)
 
 
 def log_p_alpha_prime(alpha, k, N):
     """
     the derivative (wrt alpha) of the log of eq 15 (Rasmussen 2000)
     """
-    return (k - 1.5)/alpha + 0.5/(alpha*alpha) + special.psi(alpha) - special.psi(alpha + N)
+    return (k - 1.5) / alpha + 0.5 / (alpha * alpha) + special.psi(alpha) - special.psi(alpha + N)
 
 
 def log_p_beta(beta, M, cumculative_sum_equation=1):
     """
     the log of eq 9 (Rasmussen 2000)
     """
-    return -M*special.gammaln(beta/2) \
-        - 0.5/beta \
-        + 0.5*(beta*M-3)*np.log(beta/2) \
-        + 0.5*beta*cumculative_sum_equation
+    return -M * special.gammaln(beta / 2) \
+           - 0.5 / beta \
+           + 0.5 * (beta * M - 3) * np.log(beta / 2) \
+           + 0.5 * beta * cumculative_sum_equation
 
 
 def log_p_beta_prime(beta, M, cumculative_sum_equation=1):
     """
     the derivative of the log of eq 9 (Rasmussen 2000)
     """
-    return -M*special.psi(0.5*beta) \
-        + 0.5/beta**2 \
-        + 0.5*M*np.log(0.5*beta) \
-        + (M*beta -3)/beta \
-        + 0.5*cumculative_sum_equation
+    return -M * special.psi(0.5 * beta) \
+           + 0.5 / beta ** 2 \
+           + 0.5 * M * np.log(0.5 * beta) \
+           + (M * beta - 3) / beta \
+           + 0.5 * cumculative_sum_equation
 
 
 def draw_beta_ars(w, s, M, k, size=1):
@@ -154,10 +170,10 @@ def draw_beta_ars(w, s, M, k, size=1):
     for sj in s:
         cumculative_sum_equation += np.log(sj[k])
         cumculative_sum_equation += np.log(w[k])
-        cumculative_sum_equation -= w[k]*sj[k]
+        cumculative_sum_equation -= w[k] * sj[k]
     lb = D
     ars = ARS(log_p_beta, log_p_beta_prime, xi=[lb + 15], lb=lb, ub=float("inf"), \
-             M=M, cumculative_sum_equation=cumculative_sum_equation)
+              M=M, cumculative_sum_equation=cumculative_sum_equation)
     return ars.draw(size)
 
 
@@ -183,11 +199,13 @@ def draw_gamma(a, theta, size=1):
     """
     return gamma.rvs(a, loc=0, scale=theta, size=size)
 
+
 def draw_invgamma(a, theta, size=1):
     """
     returns inverse Gamma distributed samples
     """
     return invgamma.rvs(a, loc=0, scale=theta, size=size)
+
 
 def draw_wishart(df, scale, size=1):
     """
@@ -217,12 +235,12 @@ def draw_indicator(pvec):
     res = np.zeros(pvec.shape[1])
     # loop over each data point
     for j in range(pvec.shape[1]):
-        c = np.cumsum(pvec[ : ,j])        # the cumulative un-scaled probabilities
-        R = np.random.uniform(0, c[-1], 1)        # a random number
-        r = (c - R)>0                     # truth table (less or greater than R)
-        y = (i for i, v in enumerate(r) if v)    # find first instant of truth
+        c = np.cumsum(pvec[:, j])  # the cumulative un-scaled probabilities
+        R = np.random.uniform(0, c[-1], 1)  # a random number
+        r = (c - R) > 0  # truth table (less or greater than R)
+        y = (i for i, v in enumerate(r) if v)  # find first instant of truth
         try:
-            res[j] = y.__next__()           # record component index
-        except:                 # if no solution (must have been all zeros)
-            res[j] = np.random.randint(0, pvec.shape[0]) # pick uniformly
+            res[j] = y.__next__()  # record component index
+        except:  # if no solution (must have been all zeros)
+            res[j] = np.random.randint(0, pvec.shape[0])  # pick uniformly
     return res
