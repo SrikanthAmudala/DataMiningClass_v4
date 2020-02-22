@@ -137,7 +137,7 @@ class Samples:
 
 import cv2
 
-input_img_path = "/Users/Srikanth/PycharmProjects/DataMiningClass/datasets/testSample_copy.jpg"
+input_img_path = r"datasets/testSample_copy.jpg"
 X = x = cv2.imread(input_img_path, 0).reshape(-1)
 
 # Nsamples=500
@@ -238,7 +238,7 @@ z = np.zeros(N)
 
 
 while no_of_iterations < Nsamples:
-    c = c.reshape(-1, 1)
+    c = c.reshape(-1, k)
     epsolon = mk
     var_test = sk
     epsolon_in = np.exp(
@@ -246,7 +246,7 @@ while no_of_iterations < Nsamples:
 
     num1 = w * row_in_e.reshape(-1, 1)
     den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
-    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0)
+    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0) # eq 23
     # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
 
     for cluster in range(k):
@@ -277,6 +277,8 @@ while no_of_iterations < Nsamples:
                     e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
 
                 # e_x_mean_lambda_[i, cluster] = abs(e_x_mean_lambda_[i, cluster])
+    test_mk_num = c.copy()
+    test_mk_den = c.copy()
 
     for cluster in range(k):
         for i in range(len(x)):
@@ -292,8 +294,7 @@ while no_of_iterations < Nsamples:
                                                   shape[cluster] - 1) / (2 * x[i] ** 2)
             else:
                 test_mk_den[i, cluster] = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * mk[
-                    cluster] ** (
-                                                  shape[cluster] - 2)
+                    cluster] ** (shape[cluster] - 2)
 
                 if test_mk_den[i, cluster] <= 0:
                     test_mk_den[i, cluster] = 0
@@ -314,7 +315,8 @@ while no_of_iterations < Nsamples:
 
                 test_mk_num[i, cluster] = term1 + term0
 
-        numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * m0[cluster] / 2
+        # numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * m0[cluster] / 2
+        numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * mk[cluster] / 2
         sk[cluster] = test_mk_den.sum(axis=0)[cluster] + sk[cluster] / 2
 
         mk[cluster] = numerator / sk[cluster]
@@ -433,6 +435,18 @@ while no_of_iterations < Nsamples:
 
     # for the represented components, eq 17 (Rasmussen 2000)
 
+    """
+    Change c to single dimension array
+    """
+
+    c_list = list(c)
+    c_list = [list(i) for i in c_list]
+    c_list_resp = []
+    for i in c_list:
+        c_list_resp.append(i.index(max(i)))
+
+
+
     for j in range(M):
         # n-i,j : the number of oberservations, excluding Xi, that are associated with component j
         nij = n[j] - (c == j).astype(int)
@@ -443,7 +457,11 @@ while no_of_iterations < Nsamples:
             # for k in range(D):
             #     Generalized_Gaussin_PDF()
 
-            likelihood_for_associated_data[i] = Generalized_Gaussin_PDF(X, mk[j], sk[j], shape[j])
+
+            likelihood_for_associated_data[i] = (shape[j] * np.power(sk[j], 1 / shape[j])) / (2 * gamma_pdf(1 / shape[j])) * np.exp(
+                    -sk[j] * np.power(np.abs(X[i] - mk[j]), shape[j]))
+
+
 
         p_indicators_prior[j, idx] = nij[idx] / (N - 1.0 + alpha) * likelihood_for_associated_data
 
@@ -453,15 +471,20 @@ while no_of_iterations < Nsamples:
     # sort out based on new stochastic indicators
     nij = np.sum(c == M)  # see if the *new* component has occupancy
     print("NIJ: ", nij)
-
+    temp_c_holder = c.copy()
     if nij > 0:
         # draw from priors and increment M
-        newmu = np.array([np.squeeze(draw_normal(mk, 1 / sk))])
-        new_sk = np.array([np.squeeze(draw_gamma(alphak, betak))])
+        # newmu = np.array([np.squeeze(draw_normal(mk, 1 / sk))])
+        # new_sk = np.array([np.squeeze(draw_gamma(alphak, betak))])
+        # mk = np.concatenate((mk, np.reshape(newmu, -1)))
+        # sk = np.concatenate((sk, np.reshape(new_sk, -1)))
+        # shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
+
+        newmu = np.array([np.squeeze(draw_normal(m0, 1 / s0))])
+        new_sk = np.array([np.squeeze(draw_gamma(alpha0, beta0))])
         mk = np.concatenate((mk, np.reshape(newmu, -1)))
         sk = np.concatenate((sk, np.reshape(new_sk, -1)))
         shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
-
 
         #
         # mk = np.concatenate((mk np.reshape(newmu, (1, D))))
@@ -469,33 +492,65 @@ while no_of_iterations < Nsamples:
         # s_r = np.concatenate((s_r, np.reshape(news_r, (1, D))))
 
         M = M + 1
-    k = M
-    rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
-    Nk = rnk.sum(axis=0)
-    alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
-    betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
+        k = M
 
-    term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
+        temp = np.zeros((len(x), k))
+        z_for_c = []
+        for i, j in zip(c, temp):
+            j[int(i)] = 1
+            z_for_c.append(j)
+        z_for_c = np.asarray(z_for_c)
 
-    term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
-        axis=1)
-    row_in_e = np.exp(term1 - term2)
+        c = z_for_c
+        rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
+        Nk = rnk.sum(axis=0)
+        # alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
+        # betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
+        alphak = Nk / 2 + alpha0 - 1
+        e_x_mean_lambda_ = c.copy()
+        for cluster in range(k):
+            for i in range(len(x)):
+                if x[i] > mk[cluster]:
+                    if x[i] != 0:
+                        e_x_mean_lambda_[i, cluster] = x[i] ** shape[cluster] - shape[cluster] * x[i] ** shape[
+                            cluster] / x[
+                                                           i] * \
+                                                       mk[
+                                                           cluster] + shape[cluster] / 2 * (
+                                                               shape[cluster] - 1) * x[i] ** shape[cluster] / x[
+                                                           i] ** 2 * (
+                                                               1 / sk[cluster] + mk[cluster] ** 2)
 
 
 
+                else:
 
-    temp = np.zeros((len(x), k))
-    z_for_c = []
-    for i, j in zip(c, temp):
-        j[int(i)] = 1
-        z_for_c.append(j)
-    z_for_c = np.asarray(z_for_c)
-    temp_c_holder = c.copy()
-    c = z_for_c
+                    t1 = -shape[cluster] * x[i] * e_mean_n(sk, mk, shape[cluster] - 1, k)
+                    e_mean2 = e_mean_n(sk, mk, shape[cluster] - 2, k)
+                    t2 = [0, 0]
+
+                    if shape[cluster] > 1:
+                        t2 = shape[cluster] / 2 * (shape[cluster] - 1) * x[i] ** 2 * e_mean2
+
+                    e_x_mean_lambda_[i, cluster] = abs(
+                        e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
+
+        betak = beta0 + (rnk * e_x_mean_lambda_).sum(axis=0)
+
+        e_precision_ = alphak / betak
+        gammak = gama0 + Nk
+        e_ln_pi = e_ln_pi_k(gammak, Nk)
+        e_ln_precision_ = digamma(alphak) - np.log(betak)
+
+        term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
+
+        term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
+            axis=1)
+        row_in_e = np.exp(term1 - term2)
+        w = fik.sum(axis=0) / len(fik)
 
     # find the associated number for every components
     n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
-
     # find unrepresented components
     badidx = np.argwhere(n == 0)
     Nbad = len(badidx)

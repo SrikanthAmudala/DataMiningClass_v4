@@ -96,9 +96,16 @@ from scipy.special import gamma as gamma_pdf
 
 def Generalized_Gaussin_PDF(x_k, mk, sk, shape):
     y_k = np.zeros(x_k.shape[0])
+    # mk = mk.reshape(-1,1)
+    # mk_shape = mk.shape(0)
+
+    # for i, xik in enumerate(x_k):
+    #     y_k[i] = (shape * np.power(sk, 1 / shape)) / (2 * gamma_pdf(1 / shape)) * np.exp(
+    #         -sk * np.power(np.abs(xik - mk), shape))
+
     for i, xik in enumerate(x_k):
-        y_k[i] = (shape * np.power(sk, 1 / shape)) / (2 * gamma_pdf(1 / shape)) * np.exp(
-            -sk * np.power(np.abs(xik - mk), shape))
+        y_k[i] = sum((shape * np.power(sk, 1 / shape)) / (2 * gamma_pdf(1 / shape)) * np.exp(
+            -sk * np.power(np.abs(xik - mk), shape)))
 
     return y_k
 
@@ -111,14 +118,7 @@ def integral_approx(X, mk, sk, shape, size=20):
     temp = np.zeros(len(X))
     i = 0
     while i < size:
-        # mu = np.array([np.squeeze(norm.rvs(loc=lam[k], scale=1/r[k], size=1)) for k in range(D)])
-        # mu = draw_MVNormal(mean=lam, cov=1 / r)
-        # s_l = np.array([np.squeeze(draw_gamma(beta_l[k] / 2, 2 / (beta_l[k] * w_l[k]))) for k in range(D)])
-        # s_r = np.array([np.squeeze(draw_gamma(beta_r[k] / 2, 2 / (beta_r[k] * w_r[k]))) for k in range(D)])
-
-
         ini = np.ones(len(X))
-        # for k in range(D):
         temp_para = Generalized_Gaussin_PDF(X, mk, sk, shape)
         ini *= temp_para
         temp += ini
