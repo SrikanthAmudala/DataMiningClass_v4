@@ -229,8 +229,10 @@ def infinte_mixutre_model(X, Nsamples=500, Nint=50, anneal=False):
         alpha = draw_alpha(M, N)
 
         # compute the unrepresented probability - apply simulated annealing, eq 17 (Rasmussen 2000)
-        p_unrep = (alpha / (N - 1.0 + alpha)) * integral_approx(X, lam, r, beta_l, beta_r, w_l, w_r, )
 
+        print("Intergal approx: ", integral_approx(X, lam, r, beta_l, beta_r, w_l, w_r, ).shape)
+
+        p_unrep = (alpha / (N - 1.0 + alpha)) * integral_approx(X, lam, r, beta_l, beta_r, w_l, w_r, )
 
         p_indicators_prior = np.outer(np.ones(M + 1), p_unrep)
 
@@ -261,11 +263,15 @@ def infinte_mixutre_model(X, Nsamples=500, Nint=50, anneal=False):
         nij = np.sum(c == M)  # see if the *new* component has occupancy
 
         print("Nij: ", nij)
-        print("shape of c: ",np.unique(c))
+        print("shape of c: ", np.unique(c))
 
         if nij > 0:
             # draw from priors and increment M
+
+            print("Lam: ", lam.shape)
+            print("r: ", r.shape)
             newmu = np.array([np.squeeze(draw_normal(lam[k], 1 / r[k])) for k in range(D)])
+
             news_l = np.array([np.squeeze(draw_gamma(beta_l[k] / 2, 2 / (beta_l[k] * w_l[k]))) for k in range(D)])
             news_r = np.array([np.squeeze(draw_gamma(beta_r[k] / 2, 2 / (beta_r[k] * w_r[k]))) for k in range(D)])
             mu = np.concatenate((mu, np.reshape(newmu, (1, D))))
