@@ -1,5 +1,5 @@
 """
-Infinite Generalized Gaussian Mixture model
+Infinite Generalized Gaussian Mixture model working
 @author: Srikanth Amudala
 """
 
@@ -469,6 +469,7 @@ while no_of_iterations < Nsamples:
 
     # sort out based on new stochastic indicators
     nij = np.sum(c == M)  # see if the *new* component has occupancy
+    print("C: ",np.unique(c))
     print("NIJ: ", nij)
     temp_c_holder = c.copy()
 
@@ -555,7 +556,7 @@ while no_of_iterations < Nsamples:
         e_ln_precision_ = np.delete(e_ln_precision_, badidx, axis=0)
         e_x_mean_lambda_ = np.delete(e_x_mean_lambda_, badidx, axis=1)
         rnk = np.delete(rnk, badidx, axis=1)
-        Nk = Nk.delete(rnk, badidx, axis=0)
+        Nk = np.delete(Nk, badidx, axis=0)
         c = np.delete(c, badidx, axis=1)
 
         # s_r = np.delete(s_r, badidx, axis=0)
@@ -570,11 +571,8 @@ while no_of_iterations < Nsamples:
 
     # recompute pi
     pi = n.astype(float) / np.sum(n)
-    print('mk: ', mk)
-    print('sk: ', sk)
-    print('shape: ', shape)
-    print('alphak: ', alphak)
-    print('betak', betak)
+    print('mk: ', mk.shape)
+
     pcnt = int(100.0 * no_of_iterations / float(Nsamples))
     if pcnt > oldpcnt:
         print('{}: %--- {}% complete ----------------------%'.format(time.asctime(), pcnt))

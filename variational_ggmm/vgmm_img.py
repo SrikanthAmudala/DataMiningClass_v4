@@ -6,14 +6,14 @@ import pandas
 
 import cv2
 
-input_path = "/Users/Srikanth/PycharmProjects/DataMiningClass/datasets/face.jpg"
+input_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\testSample_copy.jpg"
 img = cv2.imread(input_path)
 
 o_shape = img.shape
-k = 2
+k = 7
 new_data = img.reshape(-1, 3)
-vgmm = BayesianGaussianMixture(n_components=k)
-# vgmm = GaussianMixture(n_components=k)
+# vgmm = BayesianGaussianMixture(n_components=k)
+vgmm = GaussianMixture(n_components=k)
 vgmm = vgmm.fit(new_data)
 cluater = vgmm.predict(new_data)
 
@@ -29,12 +29,12 @@ pyplot.show()
 
 
 
-import matplotlib.pyplot as plt
-import cv2
-im = cv2.imread('/Users/Srikanth/PycharmProjects/DataMiningClass/datasets/face.jpg')
-# calculate mean value from RGB channels and flatten to 1D array
-vals = im.mean(axis=2).flatten()
-# plot histogram with 255 bins
-b, bins, patches = plt.hist(vals, 255)
-plt.xlim([0,255])
-plt.show()
+# import matplotlib.pyplot as plt
+# import cv2
+# im = cv2.imread('/Users/Srikanth/PycharmProjects/DataMiningClass/datasets/face.jpg')
+# # calculate mean value from RGB channels and flatten to 1D array
+# vals = im.mean(axis=2).flatten()
+# # plot histogram with 255 bins
+# b, bins, patches = plt.hist(vals, 255)
+# plt.xlim([0,255])
+# plt.show()

@@ -1,5 +1,5 @@
 """
-GGMM WITH FEATURE SELECTION
+GGMM WITH FEATURE SELECTION FIXED WI, FI
 """
 import matplotlib.pyplot as plt
 import math
