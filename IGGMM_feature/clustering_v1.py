@@ -1,5 +1,5 @@
 """
-GGMM WITH FEATURE SELECTION
+GGMM WITH FEATURE SELECTION FIXED WI, FI
 """
 import matplotlib.pyplot as plt
 import math
@@ -109,7 +109,9 @@ import pandas
 #     header=None,
 #     skiprows=1)
 
-input_img_path = r"datasets/testSample_copy.jpg"
+# input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\testSample_copy.jpg"
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\testSample.jpg"
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\testSamplelessres.jpg"
 import cv2
 from matplotlib import pyplot
 
@@ -179,17 +181,15 @@ row_in_e = np.exp(term1 - term2)  # Eq. 24
 w = 1
 
 no_of_iterations = 0
-
-while no_of_iterations < 1:
-
-    epsolon = mk
-    var_test = sk
+epsolon = 1
+var_test = 1
+while no_of_iterations < 50:
     epsolon_in = np.exp(
-        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon.reshape(-1, 1).T) ** 2) + 1 / 2 * np.log(1 / var_test))
+        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(1 / var_test))
 
     num1 = w * row_in_e.reshape(-1, 1)
     den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
-    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0)
+    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
     # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
 
     for cluster in range(k):
@@ -224,28 +224,28 @@ while no_of_iterations < 1:
     for cluster in range(k):
         for i in range(len(x)):
             if x[i] > mk[cluster]:
-                test_mk_num[i, cluster] = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * shape[
+                test_mk_num[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[
                     cluster] * abs(
                     x[i] ** shape[cluster]) / (
                                               x[i])
 
-                test_mk_den[i, cluster] = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * abs(x[i]) ** \
+                test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * abs(x[i]) ** \
                                           shape[cluster] * shape[
                                               cluster] * (
                                                   shape[cluster] - 1) / (2 * x[i] ** 2)
             else:
-                test_mk_den[i, cluster] = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * mk[
+                test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * mk[
                     cluster] ** (
                                                   shape[cluster] - 2)
 
                 if test_mk_den[i, cluster] <= 0:
                     test_mk_den[i, cluster] = 0
 
-                term0 = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 2 * mk[
+                term0 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 2 * mk[
                     cluster] ** (
                                 shape[cluster] - 2) * x[i]
 
-                term1 = fik[i][cluster] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 4 * (
+                term1 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 4 * (
                         shape[cluster] - 1) * mk[
                             cluster] ** (shape[cluster] - 3) * x[i] ** 2
 
@@ -266,8 +266,8 @@ while no_of_iterations < 1:
 
     # betak = beta0 + (rnk * e_x_mean_lambda_).sum(axis=0)
 
-    alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
-    betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
+    alphak = (rnk * fik.reshape(-1, 1)).sum(axis=0) / 2 + alpha0 - 1
+    betak = beta0 + (rnk * fik.reshape(-1, 1) * e_x_mean_lambda_).sum(axis=0)
 
     gammak = gama0 + Nk
 
@@ -330,18 +330,19 @@ while no_of_iterations < 1:
     row_in_e = np.exp(term1 - term2)
 
     epsolon_in = np.exp(
-        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon.reshape(-1, 1).T) ** 2) + 1 / 2 * np.log(
+        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(
             1 / var_test))
     num1 = w * row_in_e.reshape(-1, 1)
     den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
-    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0)
+    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
     # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
-    epsolon_num = (fik * x.reshape(-1, 1)).sum(axis=0)
+    epsolon_num = (fik * x).sum(axis=0)
 
     epsolon_den = fik.sum(axis=0)
     epsolon = np.divide(epsolon_num, epsolon_den, out=np.zeros_like(epsolon_num), where=epsolon_den != 0)
 
-    var_test_num = (fik * ((x - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0)
+    var_test_num = (fik * ((x - epsolon) ** 2)).sum(axis=0)
+
     var_test_den = fik.sum(axis=0)
 
     var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
@@ -350,16 +351,16 @@ while no_of_iterations < 1:
 
     for i in range(k):
         p1 = (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
-        p2 = fik[:, i] * (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
+        p2 = fik * (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
         # p3_3 = np.divide(1, var_test[i], out=np.zeros_like(1), where=var_test[i] != 0)
-        if var_test[i].any() == 0:
+        if var_test.any() == 0:
             p3_3 = 0
         else:
-            p3_3 = 1 / var_test[i]
+            p3_3 = 1 / var_test
 
-        p3 = (1 / 2) * np.log(1 / var_test[i]) + np.log(2) - np.log(2 * gamma(1 / 2)) - p3_3 * (
-                x - epsolon[i]) ** 2
-        p4 = e_ln_pi[i] + p2 + (1 - fik[:, i]) * p3
+        p3 = (1 / 2) * np.log(1 / var_test) + np.log(2) - np.log(2 * gamma(1 / 2)) - p3_3 * (
+                x - epsolon) ** 2
+        p4 = e_ln_pi[i] + p2 + (1 - fik) * p3
         c[:, i] = p4
 
     # np.seterr(divide='ignore', invalid='ignore')
@@ -394,4 +395,4 @@ while no_of_iterations < 1:
     # pyplot.savefig("/Users/Srikanth/PycharmProjects/DataMiningClass/outputs/starfish/" + str(count) + ".png")
     pyplot.show()
 
-    no_of_iterations+=1
+    no_of_iterations += 1
