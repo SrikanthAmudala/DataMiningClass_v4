@@ -469,7 +469,7 @@ while no_of_iterations < Nsamples:
 
     # sort out based on new stochastic indicators
     nij = np.sum(c == M)  # see if the *new* component has occupancy
-    print("C: ",np.unique(c))
+    print("C: ", np.unique(c))
     print("NIJ: ", nij)
     temp_c_holder = c.copy()
 
@@ -565,7 +565,7 @@ while no_of_iterations < Nsamples:
             idx = np.argwhere(temp_c_holder >= (i - cnt))
             temp_c_holder[idx] = temp_c_holder[idx] - 1
         M -= Nbad  # update component number
-        k -=Nbad
+        k -= Nbad
     # recompute n
     n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
 
@@ -578,8 +578,6 @@ while no_of_iterations < Nsamples:
         print('{}: %--- {}% complete ----------------------%'.format(time.asctime(), pcnt))
         oldpcnt = pcnt
 
-
-
     no_of_iterations += 1
     # print(n)
     result = []
@@ -589,8 +587,8 @@ while no_of_iterations < Nsamples:
         result.append(response.index(max(response)))
     result = np.asarray(result)
     pyplot.imshow(result.reshape(67, 100))
-    pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(no_of_iterations) + ".png")
+    pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
+        no_of_iterations) + ".png")
     pyplot.show()
-
 
 # return Samp, X, c, n

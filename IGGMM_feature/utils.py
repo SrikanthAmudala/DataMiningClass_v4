@@ -114,13 +114,18 @@ def integral_approx(X, mk, sk, shape, size=20):
     """
     estimates the integral, eq 17 (Rasmussen 2000)
     """
+
     # N, D = X.shape
+    N = len(X)
+    D = 1
+
     temp = np.zeros(len(X))
     i = 0
     while i < size:
         ini = np.ones(len(X))
-        temp_para = Generalized_Gaussin_PDF(X, mk, sk, shape)
-        ini *= temp_para
+        for d in range(D):
+            temp_para = Generalized_Gaussin_PDF(X[:, d], mk[:, d], sk[:, d], shape)
+            ini *= temp_para
         temp += ini
         i += 1
     return temp / float(size)
