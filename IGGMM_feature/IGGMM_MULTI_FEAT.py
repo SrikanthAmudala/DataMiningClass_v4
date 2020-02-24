@@ -382,12 +382,17 @@ while no_of_iterations < Nsamples:
         epsolon_den = fik.sum(axis=0)
         epsolon = np.divide(epsolon_num, epsolon_den, out=np.zeros_like(epsolon_num), where=epsolon_den != 0)
 
+        epsolon_d[d_itr] = epsolon
+
         var_test_num = (fik * ((x - epsolon) ** 2)).sum(axis=0)
 
         var_test_den = fik.sum(axis=0)
 
         var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
+        print("Var num: ", var_test_num)
+        print("Var den: ", var_test_den)
         print("Var test: ", var_test)
+        print("epsolon: ", epsolon)
         # epsolon = (fik * x_test.reshape(-1, 1)).sum(axis=0) / fik.sum(axis=0)
         # var_test = (fik * ((x_test - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0) / fik.sum(axis=0)
         var_test_d[d_itr] = var_test
