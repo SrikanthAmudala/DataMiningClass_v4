@@ -60,7 +60,7 @@ def main():
     # if args.inputfile:
     #     Y = readdata(args.inputfile)
 
-    Y = readdata("/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/IAGM_master/datasets/MVN_4components_diagonal_cov.csv")
+    Y = readdata(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv")
     # call igmm Gibbs sampler
     # Samp, Y, c, n = infinte_mixutre_model(Y, Nsamples=args.Nsamples, Nint=args.Nint,
     #                                 anneal=args.anneal)

@@ -1,5 +1,5 @@
 """
-Infinite Generalized Gaussian Mixture model with fixed k value for multi dimension data on aero plan and bike classification
+not working
 @author: Srikanth Amudala
 """
 
@@ -140,8 +140,8 @@ import cv2
 # input_img_path = "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/testSample_copy.jpg"
 
 
-# input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv"
-input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\classification\aero_bike\with_targets\MICC_F220_bow_200.csv"
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv"
+# input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\classification\aero_bike\with_targets\MICC_F220_bow_200.csv"
 import pandas
 dataset_df = pandas.read_csv(input_img_path, header=None, skiprows=1)
 dataset = dataset_df.values
@@ -262,202 +262,228 @@ no_of_iterations = 0
 z = np.zeros(N)
 # Nsamples = 1
 
+import multiprocessing
+
+results = []
+
+
+def collect_result(result):
+    global results
+    results.append(result)
+
+
+def IGGMM(alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0, d_itr, c, rnk):
+    row_in_e = row_in_e_d[:, d_itr]
+    x = X[:, d_itr]
+    c = c.reshape(-1, k)
+    test_mk_num = c.copy()
+    test_mk_den = c.copy()
+
+    epsolon_in = np.exp(
+        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(1 / var_test))
+
+    num1 = w * row_in_e.reshape(-1, 1)
+    den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
+    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
+    # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
+    for cluster in range(k):
+        for i in range(len(x)):
+            if x[i] > mk[cluster]:
+                if x[i] != 0:
+                    e_x_mean_lambda_[i, cluster] = x[i] ** shape[cluster] - shape[cluster] * x[i] ** shape[
+                        cluster] / x[
+                                                       i] * \
+                                                   mk[
+                                                       cluster] + shape[cluster] / 2 * (
+                                                           shape[cluster] - 1) * x[i] ** shape[cluster] / x[
+                                                       i] ** 2 * (
+                                                           1 / sk[cluster] + mk[cluster] ** 2)
+
+
+
+            else:
+
+                t1 = -shape[cluster] * x[i] * e_mean_n(sk, mk, shape[cluster] - 1, k)
+                e_mean2 = e_mean_n(sk, mk, shape[cluster] - 2, k)
+                t2 = [0, 0]
+
+                if shape[cluster] > 1:
+                    t2 = shape[cluster] / 2 * (shape[cluster] - 1) * x[i] ** 2 * e_mean2
+
+                e_x_mean_lambda_[i, cluster] = abs(
+                    e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
+
+                # e_x_mean_lambda_[i, cluster] = abs(e_x_mean_lambda_[i, cluster])
+
+    for cluster in range(k):
+        for i in range(len(x)):
+            if x[i] > mk[cluster]:
+                test_mk_num[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[
+                    cluster] * abs(
+                    x[i] ** shape[cluster]) / (
+                                              x[i])
+
+                test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * abs(x[i]) ** \
+                                          shape[cluster] * shape[
+                                              cluster] * (
+                                                  shape[cluster] - 1) / (2 * x[i] ** 2)
+            else:
+                test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * mk[
+                    cluster] ** (
+                                                  shape[cluster] - 2)
+
+                if test_mk_den[i, cluster] <= 0:
+                    test_mk_den[i, cluster] = 0
+
+                term0 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 2 * mk[
+                    cluster] ** (
+                                shape[cluster] - 2) * x[i]
+
+                term1 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 4 * (
+                        shape[cluster] - 1) * mk[
+                            cluster] ** (shape[cluster] - 3) * x[i] ** 2
+
+                if term1 <= 0:
+                    term1 = 0
+
+                if term0 <= 0:
+                    term0 = 0
+
+                test_mk_num[i, cluster] = term1 + term0
+
+        # numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * m0[cluster] / 2
+        numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * mk[cluster] / 2
+        sk[cluster] = test_mk_den.sum(axis=0)[cluster] + sk[cluster] / 2
+        sk_d[cluster][d_itr] = sk[cluster]
+
+        mk[cluster] = numerator / sk[cluster]
+        mk_d[cluster][d_itr] = mk[cluster]
+    # alphak = Nk / 2 + alpha0 - 1
+
+    # betak = beta0 + (rnk * e_x_mean_lambda_).sum(axis=0)
+
+    alphak = (rnk * fik.reshape(-1, 1)).sum(axis=0) / 2 + alpha0 - 1
+    betak = beta0 + (rnk * fik.reshape(-1, 1) * e_x_mean_lambda_).sum(axis=0)
+    alphak_d[:, d_itr] = alphak
+    betak_d[:, d_itr] = betak
+    gammak = gama0 + Nk
+
+    w = fik.sum(axis=0) / len(fik)
+    w_d[d_itr] = w
+
+    # print("W_d: ",w_d)
+    # print("w: ", w)
+
+    for i in range(k):
+        p1 = e_ln_pi[i] + (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
+        c[:, i] = (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
+
+    z1_num = np.exp(c)
+    z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
+
+    # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
+    rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
+
+    term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
+
+    term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
+        axis=1)
+    row_in_e = np.exp(term1 - term2)
+
+    epsolon_in = np.exp(
+        -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(
+            1 / var_test))
+    num1 = w * row_in_e.reshape(-1, 1)
+    den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
+    fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
+    # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
+    epsolon_num = (fik * x).sum(axis=0)
+
+    epsolon_den = fik.sum(axis=0)
+    epsolon = np.divide(epsolon_num, epsolon_den, out=np.zeros_like(epsolon_num), where=epsolon_den != 0)
+    epsolon_d[d_itr] = epsolon
+    var_test_num = (fik * ((x - epsolon) ** 2)).sum(axis=0)
+
+    var_test_den = fik.sum(axis=0)
+
+    # print("Var num: ", var_test_num)
+    # print("Var den: ", var_test_den)
+    # print("Var test: ", var_test)
+    # print("epsolon: ", epsolon)
+    var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
+    # print("Var test: ", var_test)
+    # epsolon = (fik * x_test.reshape(-1, 1)).sum(axis=0) / fik.sum(axis=0)
+    # var_test = (fik * ((x_test - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0) / fik.sum(axis=0)
+    var_test_d[d_itr] = var_test
+
+    for i in range(k):
+        p1 = (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
+        p2 = fik * (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
+        # p3_3 = np.divide(1, var_test[i], out=np.zeros_like(1), where=var_test[i] != 0)
+        if var_test.any() == 0:
+            p3_3 = 0
+        else:
+            p3_3 = 1 / var_test
+
+        p3 = (1 / 2) * np.log(1 / var_test) + np.log(2) - np.log(2 * gamma(1 / 2)) - p3_3 * (
+                x - epsolon) ** 2
+
+        p4 = e_ln_pi[i] + p2 + (1 - fik) * p3
+        c[:, i] = p4
+
+    # np.seterr(divide='ignore', invalid='ignore')
+    # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
+    z1_num = np.exp(c)
+    z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
+
+    # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
+    rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
+    # return rnk
+    w = fik.sum(axis=0) / len(fik)
+    print("w: ", w)
+    w_d[d_itr] = w
+    return rnk
 
 
 while no_of_iterations < Nsamples:
     d_itr = 0
+    print("New Epoach ")
+    pool = multiprocessing.Pool(d)
+
+
     for alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0 in zip(
             alpha0_d.reshape(-1, k), beta0_d.reshape(-1, k), alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
             epsolon_d, var_test_d, e_ln_precision_d.reshape(-1, k), e_precision_d.reshape(-1, k), mk_d.reshape(-1, k),
             sk_d.reshape(-1, k), m0_d.reshape(-1, k), s0_d.reshape(-1, k)):
-        row_in_e = row_in_e_d[:, d_itr]
-        x = X[:, d_itr]
-        c = c.reshape(-1, k)
-        test_mk_num = c.copy()
-        test_mk_den = c.copy()
-
-        epsolon_in = np.exp(
-            -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(1 / var_test))
-
-        num1 = w * row_in_e.reshape(-1, 1)
-        den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
-        fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
-        # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
-        for cluster in range(k):
-            for i in range(len(x)):
-                if x[i] > mk[cluster]:
-                    if x[i] != 0:
-                        e_x_mean_lambda_[i, cluster] = x[i] ** shape[cluster] - shape[cluster] * x[i] ** shape[
-                            cluster] / x[
-                                                           i] * \
-                                                       mk[
-                                                           cluster] + shape[cluster] / 2 * (
-                                                               shape[cluster] - 1) * x[i] ** shape[cluster] / x[
-                                                           i] ** 2 * (
-                                                               1 / sk[cluster] + mk[cluster] ** 2)
+        print("d_itr: ", d_itr)
+        rnk = IGGMM(alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0, d_itr, c, rnk)
 
 
 
-                else:
-
-                    t1 = -shape[cluster] * x[i] * e_mean_n(sk, mk, shape[cluster] - 1, k)
-                    e_mean2 = e_mean_n(sk, mk, shape[cluster] - 2, k)
-                    t2 = [0, 0]
-
-                    if shape[cluster] > 1:
-                        t2 = shape[cluster] / 2 * (shape[cluster] - 1) * x[i] ** 2 * e_mean2
-
-                    e_x_mean_lambda_[i, cluster] = abs(
-                        e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
-
-                    # e_x_mean_lambda_[i, cluster] = abs(e_x_mean_lambda_[i, cluster])
-
-        for cluster in range(k):
-            for i in range(len(x)):
-                if x[i] > mk[cluster]:
-                    test_mk_num[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[
-                        cluster] * abs(
-                        x[i] ** shape[cluster]) / (
-                                                  x[i])
-
-                    test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * abs(x[i]) ** \
-                                              shape[cluster] * shape[
-                                                  cluster] * (
-                                                      shape[cluster] - 1) / (2 * x[i] ** 2)
-                else:
-                    test_mk_den[i, cluster] = fik[i] * rnk[i][cluster] * e_precision_[cluster] * mk[
-                        cluster] ** (
-                                                      shape[cluster] - 2)
-
-                    if test_mk_den[i, cluster] <= 0:
-                        test_mk_den[i, cluster] = 0
-
-                    term0 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 2 * mk[
-                        cluster] ** (
-                                    shape[cluster] - 2) * x[i]
-
-                    term1 = fik[i] * rnk[i][cluster] * e_precision_[cluster] * shape[cluster] / 4 * (
-                            shape[cluster] - 1) * mk[
-                                cluster] ** (shape[cluster] - 3) * x[i] ** 2
-
-                    if term1 <= 0:
-                        term1 = 0
-
-                    if term0 <= 0:
-                        term0 = 0
-
-                    test_mk_num[i, cluster] = term1 + term0
-
-            # numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * m0[cluster] / 2
-            numerator = test_mk_num.sum(axis=0)[cluster] + sk[cluster] * mk[cluster] / 2
-            sk[cluster] = test_mk_den.sum(axis=0)[cluster] + sk[cluster] / 2
-            sk_d[cluster][d_itr] = sk[cluster]
-
-            mk[cluster] = numerator / sk[cluster]
-            mk_d[cluster][d_itr] = mk[cluster]
-        # alphak = Nk / 2 + alpha0 - 1
-
-        # betak = beta0 + (rnk * e_x_mean_lambda_).sum(axis=0)
-
-        alphak = (rnk * fik.reshape(-1, 1)).sum(axis=0) / 2 + alpha0 - 1
-        betak = beta0 + (rnk * fik.reshape(-1, 1) * e_x_mean_lambda_).sum(axis=0)
-        alphak_d[:, d_itr] = alphak
-        betak_d[:, d_itr] = betak
-        gammak = gama0 + Nk
-
-        w = fik.sum(axis=0) / len(fik)
-        w_d[d_itr] = w
-
-        # print("W_d: ",w_d)
-        # print("w: ", w)
-
-        for i in range(k):
-            p1 = e_ln_pi[i] + (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
-            c[:, i] = (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
-
-        z1_num = np.exp(c)
-        z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
-
-        # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
-        rnk = np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
-
-        term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
-
-        term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
-            axis=1)
-        row_in_e = np.exp(term1 - term2)
-
-        epsolon_in = np.exp(
-            -1 / 2 * 1 / var_test * ((x.reshape(-1, 1) - epsolon) ** 2) + 1 / 2 * np.log(
-                1 / var_test))
-        num1 = w * row_in_e.reshape(-1, 1)
-        den1 = w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in
-        fik = np.divide(num1, den1, out=np.zeros_like(num1), where=den1 != 0).reshape(-1)
-        # fik = (w * row_in_e.reshape(-1, 1)) / (w * row_in_e.reshape(-1, 1) + (1 - w) * epsolon_in)
-        epsolon_num = (fik * x).sum(axis=0)
-
-        epsolon_den = fik.sum(axis=0)
-        epsolon = np.divide(epsolon_num, epsolon_den, out=np.zeros_like(epsolon_num), where=epsolon_den != 0)
-        epsolon_d[d_itr] = epsolon
-        var_test_num = (fik * ((x - epsolon) ** 2)).sum(axis=0)
-
-        var_test_den = fik.sum(axis=0)
 
 
-        # print("Var num: ", var_test_num)
-        # print("Var den: ", var_test_den)
-        # print("Var test: ", var_test)
-        # print("epsolon: ", epsolon)
-        var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
-        # print("Var test: ", var_test)
-        # epsolon = (fik * x_test.reshape(-1, 1)).sum(axis=0) / fik.sum(axis=0)
-        # var_test = (fik * ((x_test - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0) / fik.sum(axis=0)
-        var_test_d[d_itr] = var_test
-
-        for i in range(k):
-            p1 = (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
-            p2 = fik * (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
-            # p3_3 = np.divide(1, var_test[i], out=np.zeros_like(1), where=var_test[i] != 0)
-            if var_test.any() == 0:
-                p3_3 = 0
-            else:
-                p3_3 = 1 / var_test
-
-            p3 = (1 / 2) * np.log(1 / var_test) + np.log(2) - np.log(2 * gamma(1 / 2)) - p3_3 * (
-                    x - epsolon) ** 2
-
-
-            p4 = e_ln_pi[i] + p2 + (1 - fik) * p3
-            c[:, i] = p4
-
-        # np.seterr(divide='ignore', invalid='ignore')
-        # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
-        z1_num = np.exp(c)
-        z1_den = np.reshape(np.exp(c).sum(axis=0), (-1, 1)).T
-
-        # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
-        rnk = rnk + np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
-        # return rnk
-        w = fik.sum(axis=0) / len(fik)
-        # print("w: ", w)
-        w_d[d_itr] = w
-        print("Dimension: ", d_itr, "w: ", w)
+        pool.apply_async(IGGMM, args=(
+            alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0, d_itr, c, rnk),
+                         callback=collect_result)
         d_itr+=1
+    pool.close()
+    pool.join()
+    rnk = np.asarray(results).sum(axis=0)
     no_of_iterations += 1
-    print("############################################ no of iterations: : ", no_of_iterations)
+
 
     # print(n)
-    result = []
+    result_test = []
     rnk12 = list(rnk)
     rnk12 = [list(i) for i in rnk]
     for response in rnk12:
-        result.append(response.index(max(response)))
+        result_test.append(response.index(max(response)))
 
 
     print("####### RNK: ")
 
     for i in range(k):
-        print(i,' : ',result.count(i))
+        print(i,' : ',result_test.count(i))
 
     # result = np.asarray(result)
 

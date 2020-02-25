@@ -1,5 +1,7 @@
 """
-Infinite Generalized Gaussian Mixture model with fixed k value for multi dimension data on aero plan and bike classification
+Infinite Generalized Gaussian Mixture model for multi dimension data working
+
+DATASET: YIN AIRPLAN BIKE SUN
 @author: Srikanth Amudala
 """
 
@@ -137,21 +139,20 @@ class Samples:
 
 import cv2
 
-# input_img_path = "/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/testSample_copy.jpg"
-
-
 # input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv"
-input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\classification\aero_bike\with_targets\MICC_F220_bow_200.csv"
+# import pandas
+# dataset_df = pandas.read_csv(input_img_path, header=None)
+# dataset = dataset_df.values
+
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\classification\object_classification\yin_airpl_m_sun\target_6_4_101_91_MICC_F220_bow_200.csv"
 import pandas
 dataset_df = pandas.read_csv(input_img_path, header=None, skiprows=1)
 dataset = dataset_df.values
 
-
 # X = x = cv2.imread(input_img_path)
 X = x = dataset
 
-# X = x = (X - X.min())/(X.max() - X.min())
-# X = x = cv2.imread(input_img_path)
+X = x = (X - X.min())/(X.max() - X.min())
 original_shape = X.shape
 d = original_shape[-1]
 X = x = X.reshape(-1, d)
@@ -175,7 +176,7 @@ o_shape = x.shape
 # x = x.reshape(-1)
 # z = y_train
 
-k = 2
+k = 1
 
 c = []
 alpha0_d = np.asarray([x.mean(axis=0) ** 2 / x.var(axis=0) for _ in range(k)])
@@ -266,10 +267,15 @@ z = np.zeros(N)
 
 while no_of_iterations < Nsamples:
     d_itr = 0
-    for alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0 in zip(
-            alpha0_d.reshape(-1, k), beta0_d.reshape(-1, k), alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
+    for  alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk in zip(
+            alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
             epsolon_d, var_test_d, e_ln_precision_d.reshape(-1, k), e_precision_d.reshape(-1, k), mk_d.reshape(-1, k),
-            sk_d.reshape(-1, k), m0_d.reshape(-1, k), s0_d.reshape(-1, k)):
+            sk_d.reshape(-1, k)):
+
+        alpha0 = alpha0_d[:, d_itr].reshape(-1)
+        beta0 = beta0_d[:, d_itr].reshape(-1)
+        m0 = m0_d[:, d_itr].reshape(-1)
+        s0 = sk_d[:, d_itr].reshape(-1)
         row_in_e = row_in_e_d[:, d_itr]
         x = X[:, d_itr]
         c = c.reshape(-1, k)
@@ -367,10 +373,6 @@ while no_of_iterations < Nsamples:
 
         w = fik.sum(axis=0) / len(fik)
         w_d[d_itr] = w
-
-        # print("W_d: ",w_d)
-        # print("w: ", w)
-
         for i in range(k):
             p1 = e_ln_pi[i] + (1 / shape[i]) * e_ln_precision_[i] + np.log(shape[i]) - np.log(2 * gamma(1 / shape[i]))
             c[:, i] = (p1 - (e_precision_[i] * e_x_mean_lambda_[:, i]).reshape(-1, 1)).reshape(-1)
@@ -398,18 +400,18 @@ while no_of_iterations < Nsamples:
 
         epsolon_den = fik.sum(axis=0)
         epsolon = np.divide(epsolon_num, epsolon_den, out=np.zeros_like(epsolon_num), where=epsolon_den != 0)
+
         epsolon_d[d_itr] = epsolon
+
         var_test_num = (fik * ((x - epsolon) ** 2)).sum(axis=0)
 
         var_test_den = fik.sum(axis=0)
 
-
+        var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
         # print("Var num: ", var_test_num)
         # print("Var den: ", var_test_den)
         # print("Var test: ", var_test)
         # print("epsolon: ", epsolon)
-        var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
-        # print("Var test: ", var_test)
         # epsolon = (fik * x_test.reshape(-1, 1)).sum(axis=0) / fik.sum(axis=0)
         # var_test = (fik * ((x_test - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0) / fik.sum(axis=0)
         var_test_d[d_itr] = var_test
@@ -438,258 +440,230 @@ while no_of_iterations < Nsamples:
         # rnk = np.exp(z1) / np.reshape(np.exp(z1).sum(axis=0), (-1, 1)).T
         rnk = rnk + np.divide(z1_num, z1_den, out=np.zeros_like(z1_num), where=z1_den != 0)
         # return rnk
-        w = fik.sum(axis=0) / len(fik)
-        # print("w: ", w)
-        w_d[d_itr] = w
-        print("Dimension: ", d_itr, "w: ", w)
         d_itr+=1
+
+        print("Dimension: ", d_itr)
+
+    """
+    make changes
+    """
+
+    # recompute muy and covy
+    # muy = np.mean(X, axis=0)
+    # for k in range(D):
+    #     vary[k] = np.var(X[:, k])
+    # precisiony = 1 / vary
+    #
+    # # the observations belonged to class j
+    x = X
+
+    # X_reshape = X.reshape(-1, 1)
+    Xj = [X[np.where(z == j), :] for j, nj in enumerate(n)]
+
+    # mu_cache = mu
+    # mu = np.zeros((M, D))
+    j = 0
+    # draw muj from posterior (depends on sj, c, lambda, r), eq 4 (Rasmussen 2000)
+
+    """
+    Calculate your mean and sk normal way
+    """
+
+    # draw lambda from posterior (depends on mu, M, and r), eq 5 (Rasmussen 2000)
+
+    """
+    This will remain the same for eq 5 in Rasmussen
+    """
+
+    # draw alpha from posterior (depends on number of components M, number of observations N), eq 15 (Rasmussen 2000)
+    # Because its not standard form, using ARS to sampling
+    alpha = draw_alpha(M, N)
+
+    """
+    Finished until alpha part, check the idx and include the idx> part
+    """
+
+    # compute the unrepresented probability - apply simulated annealing, eq 17 (Rasmussen 2000)
+    p_unrep = (alpha / (N - 1.0 + alpha)) * integral_approx(X, mk_d, sk_d, shape)
+
+    p_indicators_prior = np.outer(np.ones(M + 1), p_unrep)
+
+    # for the represented components, eq 17 (Rasmussen 2000)
+
+    """
+    Change c to single dimension array
+    """
+
+    c_list = list(c)
+    c_list = [list(i) for i in c_list]
+    c_list_resp = []
+    for i in c_list:
+        c_list_resp.append(i.index(max(i)))
+    c_list_resp = np.asarray(c_list_resp)
+
+
+    for j in range(M):
+        # n-i,j : the number of oberservations, excluding Xi, that are associated with component j
+        nij = n[j] - (c_list_resp == j).astype(int)
+        idx = np.argwhere(nij > 0)
+        idx = idx.reshape(idx.shape[0])
+        likelihood_for_associated_data = np.ones(len(idx))
+        N, D = X.shape
+        for i in range(len(idx)):
+            for d in range(D):
+                likelihood_for_associated_data[i] *= (shape[j] * np.power(sk_d[j][d], 1 / shape[j])) / (
+                        2 * gamma_pdf(1 / shape[j])) * np.exp(
+                    -sk_d[j][d] * np.power(np.abs(X[i][d] - mk_d[j][d]), shape[j]))
+
+        p_indicators_prior[j, idx] = nij[idx] / (N - 1.0 + alpha) * likelihood_for_associated_data
+
+    # stochastic indicator (we could have a new component)
+    c = np.hstack(draw_indicator(np.nan_to_num(p_indicators_prior)))
+
+    # sort out based on new stochastic indicators
+    nij = np.sum(c == M)  # see if the *new* component has occupancy
+    print("C: ", np.unique(c))
+    print("NIJ: ", nij)
+    temp_c_holder = c.copy()
+
+    if nij > 0:
+        # newmu = np.array([np.squeeze(draw_normal(m0_d[d], 1 / s0_d[d])) for d in range(D)])
+        newmu = np.average(draw_normal(m0_d, 1 / s0_d, (k,D)), axis= 0)
+        # newmu = np.array([np.squeeze(draw_normal(m0_d, 1 / s0_d))])
+        # new_sk = np.array([np.squeeze(draw_gamma(alpha0, beta0))])
+        new_sk = np.average(draw_gamma(alpha0_d, beta0_d, (k, D)), axis=0)
+        # mk = np.concatenate((mk, np.reshape(newmu, -1)))
+
+        mk_d = np.concatenate((mk_d, newmu.reshape(1, -1)))
+
+        sk_d = np.concatenate((sk_d, new_sk.reshape(1, -1)))
+        shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
+
+
+        M = M + 1
+        k = M
+        print("M: ",M)
+        print("k: ",k)
+        temp = np.zeros((len(x), k))
+        z_for_c = []
+        for i, j in zip(c, temp):
+            j[int(i)] = 1
+            z_for_c.append(j)
+        z_for_c = np.asarray(z_for_c)
+        c = z_for_c
+        rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
+        Nk = rnk.sum(axis=0)
+        # alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
+        # betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
+
+
+
+        new_alphak = np.average(Nk.reshape(-1,1) / 2 + alpha0_d - 1, axis=0)
+        alphak_d = np.concatenate((alphak_d, new_alphak.reshape(1, -1)))
+
+
+        e_x_mean_lambda_ = c.copy()
+
+
+
+        # for cluster in range(k):
+        #     for i in range(len(x)):
+        #         if x[i] > mk[cluster]:
+        #             if x[i] != 0:
+        #                 e_x_mean_lambda_[i, cluster] = x[i] ** shape[cluster] - shape[cluster] * x[i] ** shape[
+        #                     cluster] / x[
+        #                                                    i] * \
+        #                                                mk[
+        #                                                    cluster] + shape[cluster] / 2 * (
+        #                                                        shape[cluster] - 1) * x[i] ** shape[cluster] / x[
+        #                                                    i] ** 2 * (
+        #                                                        1 / sk[cluster] + mk[cluster] ** 2)
+        #
+        #
+        #
+        #         else:
+        #
+        #             t1 = -shape[cluster] * x[i] * e_mean_n(sk, mk, shape[cluster] - 1, k)
+        #             e_mean2 = e_mean_n(sk, mk, shape[cluster] - 2, k)
+        #             t2 = [0, 0]
+        #
+        #             if shape[cluster] > 1:
+        #                 t2 = shape[cluster] / 2 * (shape[cluster] - 1) * x[i] ** 2 * e_mean2
+        #
+        #             e_x_mean_lambda_[i, cluster] = abs(
+        #                 e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
+
+        betak = np.average(beta0_d + (rnk * e_x_mean_lambda_).sum(axis=0).reshape(-1,1), axis=0)
+        betak_d = np.concatenate((betak_d, betak.reshape(1, -1)))
+        e_precision_d = alphak_d / betak_d
+        gammak = gama0 + Nk
+        e_ln_pi = e_ln_pi_k(gammak, Nk)
+        e_ln_precision_d = digamma(alphak_d) - np.log(betak_d)
+        # alpha0_d = alphak_d
+        # beta0_d = betak_d
+        # m0_d = mk_d
+        # s0_d = sk_d
+        # term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
+        #
+        # term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
+        #     axis=1)
+        # row_in_e = np.exp(term1 - term2)
+        # w = fik.sum(axis=0) / len(fik)
+
+    # find the associated number for every components
+    n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
+    # find unrepresented components
+    badidx = np.argwhere(n == 0)
+    Nbad = len(badidx)
+
+    # remove unrepresented components
+    if Nbad > 0:
+        print("#################")
+        print("Nbad > 0")
+        mk_d = np.delete(mk_d, badidx, axis=0)
+        sk_d = np.delete(sk_d, badidx, axis=0)
+        betak_d = np.delete(betak_d, badidx, axis=0)
+        alphak_d = np.delete(alphak_d, badidx, axis=0)
+        shape = np.delete(shape, badidx, axis=0)
+        e_precision_d = np.delete(e_precision_d, badidx, axis=0)
+        gammak = np.delete(gammak, badidx, axis=0)
+        e_ln_pi = np.delete(e_ln_pi, badidx, axis=0)
+        e_ln_precision_d = np.delete(e_ln_precision_d, badidx, axis=0)
+        e_x_mean_lambda_ = np.delete(e_x_mean_lambda_, badidx, axis=1)
+        rnk = np.delete(rnk, badidx, axis=1)
+        Nk = np.delete(Nk, badidx, axis=0)
+        c = np.delete(c, badidx, axis=1)
+
+        # s_r = np.delete(s_r, badidx, axis=0)
+        # if the unrepresented compont removed is in the middle, make the sequential component indicators change
+        for cnt, i in enumerate(badidx):
+            idx = np.argwhere(temp_c_holder >= (i - cnt))
+            temp_c_holder[idx] = temp_c_holder[idx] - 1
+        M -= Nbad  # update component number
+        k -= Nbad
+    # recompute n
+    n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
+
+    # recompute pi
+    pi = n.astype(float) / np.sum(n)
+    # print('mk: ', mk.shape)
+
+    pcnt = int(100.0 * no_of_iterations / float(Nsamples))
+    if pcnt > oldpcnt:
+        print('{}: %--- {}% complete ----------------------%'.format(time.asctime(), pcnt))
+        oldpcnt = pcnt
+
     no_of_iterations += 1
-    print("############################################ no of iterations: : ", no_of_iterations)
-
-    # print(n)
-    result = []
-    rnk12 = list(rnk)
-    rnk12 = [list(i) for i in rnk]
-    for response in rnk12:
-        result.append(response.index(max(response)))
-
-
-    print("####### RNK: ")
-
-    for i in range(k):
-        print(i,' : ',result.count(i))
-
+    print(n)
+    # result = []
+    # rnk12 = list(rnk)
+    # rnk12 = [list(i) for i in rnk]
+    # for response in rnk12:
+    #     result.append(response.index(max(response)))
     # result = np.asarray(result)
-
-
     # pyplot.imshow(result.reshape(67, 100))
-    # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
-    # #     no_of_iterations) + ".png")
+    # # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
+    # # #     no_of_iterations) + ".png")
     # pyplot.show()
-    # #
-#
-#
-#     """
-#     make changes
-#     """
-#
-#     # recompute muy and covy
-#     # muy = np.mean(X, axis=0)
-#     # for k in range(D):
-#     #     vary[k] = np.var(X[:, k])
-#     # precisiony = 1 / vary
-#     #
-#     # # the observations belonged to class j
-#     x = X
-#
-#     # X_reshape = X.reshape(-1, 1)
-#     Xj = [X[np.where(z == j), :] for j, nj in enumerate(n)]
-#
-#     # mu_cache = mu
-#     # mu = np.zeros((M, D))
-#     j = 0
-#     # draw muj from posterior (depends on sj, c, lambda, r), eq 4 (Rasmussen 2000)
-#
-#     """
-#     Calculate your mean and sk normal way
-#     """
-#
-#     # draw lambda from posterior (depends on mu, M, and r), eq 5 (Rasmussen 2000)
-#
-#     """
-#     This will remain the same for eq 5 in Rasmussen
-#     """
-#
-#     # draw alpha from posterior (depends on number of components M, number of observations N), eq 15 (Rasmussen 2000)
-#     # Because its not standard form, using ARS to sampling
-#     alpha = draw_alpha(M, N)
-#
-#     """
-#     Finished until alpha part, check the idx and include the idx> part
-#     """
-#
-#     # compute the unrepresented probability - apply simulated annealing, eq 17 (Rasmussen 2000)
-#     p_unrep = (alpha / (N - 1.0 + alpha)) * integral_approx(X, mk_d, sk_d, shape)
-#
-#     p_indicators_prior = np.outer(np.ones(M + 1), p_unrep)
-#
-#     # for the represented components, eq 17 (Rasmussen 2000)
-#
-#     """
-#     Change c to single dimension array
-#     """
-#
-#     c_list = list(c)
-#     c_list = [list(i) for i in c_list]
-#     c_list_resp = []
-#     for i in c_list:
-#         c_list_resp.append(i.index(max(i)))
-#     c_list_resp = np.asarray(c_list_resp)
-#
-#
-#     for j in range(M):
-#         # n-i,j : the number of oberservations, excluding Xi, that are associated with component j
-#         nij = n[j] - (c_list_resp == j).astype(int)
-#         idx = np.argwhere(nij > 0)
-#         idx = idx.reshape(idx.shape[0])
-#         likelihood_for_associated_data = np.ones(len(idx))
-#         N, D = X.shape
-#         for i in range(len(idx)):
-#             for d in range(D):
-#                 likelihood_for_associated_data[i] *= (shape[j] * np.power(sk_d[j][d], 1 / shape[j])) / (
-#                         2 * gamma_pdf(1 / shape[j])) * np.exp(
-#                     -sk_d[j][d] * np.power(np.abs(X[i] - mk_d[j][d]), shape[j]))
-#
-#         p_indicators_prior[j, idx] = nij[idx] / (N - 1.0 + alpha) * likelihood_for_associated_data
-#
-#     # stochastic indicator (we could have a new component)
-#     c = np.hstack(draw_indicator(p_indicators_prior))
-#
-#     # sort out based on new stochastic indicators
-#     nij = np.sum(c == M)  # see if the *new* component has occupancy
-#     print("C: ", np.unique(c))
-#     print("NIJ: ", nij)
-#     temp_c_holder = c.copy()
-#
-#     if nij > 0:
-#         # newmu = np.array([np.squeeze(draw_normal(m0_d[d], 1 / s0_d[d])) for d in range(D)])
-#         newmu = np.average(draw_normal(m0_d, 1 / s0_d, (k,D)), axis= 0)
-#         # newmu = np.array([np.squeeze(draw_normal(m0_d, 1 / s0_d))])
-#         # new_sk = np.array([np.squeeze(draw_gamma(alpha0, beta0))])
-#         new_sk = np.average(draw_gamma(alpha0_d, beta0_d, (k, D)), axis=0)
-#         # mk = np.concatenate((mk, np.reshape(newmu, -1)))
-#
-#         mk_d = np.concatenate((mk_d, newmu.reshape(1, -1)))
-#
-#         sk_d = np.concatenate((sk_d, new_sk.reshape(1, -1)))
-#         shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
-#         print("M: ", M)
-#         print("k: ", k)
-#
-#         M = M + 1
-#         k = M
-#         print("M: ",M)
-#         print("k: ",k)
-#         temp = np.zeros((len(x), k))
-#         z_for_c = []
-#         for i, j in zip(c, temp):
-#             j[int(i)] = 1
-#             z_for_c.append(j)
-#         z_for_c = np.asarray(z_for_c)
-#         c = z_for_c
-#         rnk = np.exp(c) / np.reshape(np.exp(c).sum(axis=1), (-1, 1))
-#         Nk = rnk.sum(axis=0)
-#         # alphak = (rnk * fik).sum(axis=0) / 2 + alpha0 - 1
-#         # betak = beta0 + (rnk * fik * e_x_mean_lambda_).sum(axis=0)
-#
-#
-#
-#         new_alphak = np.average(Nk.reshape(-1,1) / 2 + alpha0_d - 1, axis=0)
-#         alphak_d = np.concatenate((alphak_d, new_alphak.reshape(1, -1)))
-#
-#
-#         e_x_mean_lambda_ = c.copy()
-#
-#
-#
-#         # for cluster in range(k):
-#         #     for i in range(len(x)):
-#         #         if x[i] > mk[cluster]:
-#         #             if x[i] != 0:
-#         #                 e_x_mean_lambda_[i, cluster] = x[i] ** shape[cluster] - shape[cluster] * x[i] ** shape[
-#         #                     cluster] / x[
-#         #                                                    i] * \
-#         #                                                mk[
-#         #                                                    cluster] + shape[cluster] / 2 * (
-#         #                                                        shape[cluster] - 1) * x[i] ** shape[cluster] / x[
-#         #                                                    i] ** 2 * (
-#         #                                                        1 / sk[cluster] + mk[cluster] ** 2)
-#         #
-#         #
-#         #
-#         #         else:
-#         #
-#         #             t1 = -shape[cluster] * x[i] * e_mean_n(sk, mk, shape[cluster] - 1, k)
-#         #             e_mean2 = e_mean_n(sk, mk, shape[cluster] - 2, k)
-#         #             t2 = [0, 0]
-#         #
-#         #             if shape[cluster] > 1:
-#         #                 t2 = shape[cluster] / 2 * (shape[cluster] - 1) * x[i] ** 2 * e_mean2
-#         #
-#         #             e_x_mean_lambda_[i, cluster] = abs(
-#         #                 e_mean_n(sk, mk, shape[cluster], k)[cluster] + t1[cluster] + t2[cluster])
-#
-#         betak = np.average(beta0_d + (rnk * e_x_mean_lambda_).sum(axis=0).reshape(-1,1), axis=0)
-#         betak_d = np.concatenate((betak_d, betak.reshape(1, -1)))
-#         e_precision_d = alphak_d / betak_d
-#         gammak = gama0 + Nk
-#         e_ln_pi = e_ln_pi_k(gammak, Nk)
-#         e_ln_precision_d = digamma(alphak_d) - np.log(betak_d)
-#         alpha0_d = alphak_d
-#         beta0_d = betak_d
-#         m0_d = mk_d
-#         s0_d = sk_d
-#         # term1 = (rnk * (digamma(alphak) - np.log(betak))).sum(axis=1) / 2
-#         #
-#         # term2 = 1 / 2 * (rnk * (alphak / betak) * ((x.reshape(-1, 1) - mk.reshape(-1, 1).T) ** 2 + 1 / sk)).sum(
-#         #     axis=1)
-#         # row_in_e = np.exp(term1 - term2)
-#         # w = fik.sum(axis=0) / len(fik)
-#
-#     # find the associated number for every components
-#     n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
-#     # find unrepresented components
-#     badidx = np.argwhere(n == 0)
-#     Nbad = len(badidx)
-#
-#     # remove unrepresented components
-#     if Nbad > 0:
-#         print("#################")
-#         print("Nbad > 0")
-#         mk = np.delete(mk, badidx, axis=0)
-#         sk = np.delete(sk, badidx, axis=0)
-#         betak = np.delete(betak, badidx, axis=0)
-#         alphak = np.delete(alphak, badidx, axis=0)
-#         shape = np.delete(shape, badidx, axis=0)
-#         e_precision_ = np.delete(e_precision_, badidx, axis=0)
-#         gammak = np.delete(gammak, badidx, axis=0)
-#         e_ln_pi = np.delete(e_ln_pi, badidx, axis=0)
-#         e_ln_precision_ = np.delete(e_ln_precision_, badidx, axis=0)
-#         e_x_mean_lambda_ = np.delete(e_x_mean_lambda_, badidx, axis=1)
-#         rnk = np.delete(rnk, badidx, axis=1)
-#         Nk = np.delete(Nk, badidx, axis=0)
-#         c = np.delete(c, badidx, axis=1)
-#
-#         # s_r = np.delete(s_r, badidx, axis=0)
-#         # if the unrepresented compont removed is in the middle, make the sequential component indicators change
-#         for cnt, i in enumerate(badidx):
-#             idx = np.argwhere(temp_c_holder >= (i - cnt))
-#             temp_c_holder[idx] = temp_c_holder[idx] - 1
-#         M -= Nbad  # update component number
-#         k -= Nbad
-#     # recompute n
-#     n = np.array([np.sum(temp_c_holder == j) for j in range(M)])
-#
-#     # recompute pi
-#     pi = n.astype(float) / np.sum(n)
-#     print('mk: ', mk.shape)
-#
-#     pcnt = int(100.0 * no_of_iterations / float(Nsamples))
-#     if pcnt > oldpcnt:
-#         print('{}: %--- {}% complete ----------------------%'.format(time.asctime(), pcnt))
-#         oldpcnt = pcnt
-#
-#     no_of_iterations += 1
-#     # print(n)
-#     # result = []
-#     # rnk12 = list(rnk)
-#     # rnk12 = [list(i) for i in rnk]
-#     # for response in rnk12:
-#     #     result.append(response.index(max(response)))
-#     # result = np.asarray(result)
-#     # pyplot.imshow(result.reshape(67, 100, 3))
-#     # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
-#     # #     no_of_iterations) + ".png")
-#     # pyplot.show()
-#
-# # return Samp, X, c, n
+
+# return Samp, X, c, n

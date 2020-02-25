@@ -1,5 +1,5 @@
 """
-Infinite Generalized Gaussian Mixture model for multi dimension data
+Infinite Generalized Gaussian Mixture model for multi dimension data working
 @author: Srikanth Amudala
 """
 
@@ -137,7 +137,7 @@ class Samples:
 
 import cv2
 
-input_img_path = r"/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/IAGM_master/datasets/MVN_4components_diagonal_cov.csv"
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv"
 import pandas
 dataset_df = pandas.read_csv(input_img_path, header=None)
 dataset = dataset_df.values
@@ -615,15 +615,15 @@ while no_of_iterations < Nsamples:
     if Nbad > 0:
         print("#################")
         print("Nbad > 0")
-        mk = np.delete(mk, badidx, axis=0)
-        sk = np.delete(sk, badidx, axis=0)
-        betak = np.delete(betak, badidx, axis=0)
-        alphak = np.delete(alphak, badidx, axis=0)
+        mk_d = np.delete(mk_d, badidx, axis=0)
+        sk_d = np.delete(sk_d, badidx, axis=0)
+        betak_d = np.delete(betak_d, badidx, axis=0)
+        alphak_d = np.delete(alphak_d, badidx, axis=0)
         shape = np.delete(shape, badidx, axis=0)
-        e_precision_ = np.delete(e_precision_, badidx, axis=0)
+        e_precision_d = np.delete(e_precision_d, badidx, axis=0)
         gammak = np.delete(gammak, badidx, axis=0)
         e_ln_pi = np.delete(e_ln_pi, badidx, axis=0)
-        e_ln_precision_ = np.delete(e_ln_precision_, badidx, axis=0)
+        e_ln_precision_d = np.delete(e_ln_precision_d, badidx, axis=0)
         e_x_mean_lambda_ = np.delete(e_x_mean_lambda_, badidx, axis=1)
         rnk = np.delete(rnk, badidx, axis=1)
         Nk = np.delete(Nk, badidx, axis=0)

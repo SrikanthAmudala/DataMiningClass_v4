@@ -1,5 +1,5 @@
 """
-Infinite Generalized Gaussian Mixture model for multi dimension data
+Infinite Generalized Gaussian Mixture model for multi dimension data working
 @author: Srikanth Amudala
 """
 
@@ -137,8 +137,20 @@ class Samples:
 
 import cv2
 
-input_img_path = r"/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/testSample_copy.jpg"
-X = x = cv2.imread(input_img_path)
+# input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IAGM_master\datasets\MVN_4components_diagonal_cov.csv"
+# import pandas
+# dataset_df = pandas.read_csv(input_img_path, header=None)
+# dataset = dataset_df.values
+
+input_img_path = r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\datasets\classification\aero_bike\with_targets\MICC_F220_bow_200.csv"
+import pandas
+dataset_df = pandas.read_csv(input_img_path, header=None, skiprows=1)
+dataset = dataset_df.values
+
+# X = x = cv2.imread(input_img_path)
+X = x = dataset
+
+X = x = (X - X.min())/(X.max() - X.min())
 original_shape = X.shape
 d = original_shape[-1]
 X = x = X.reshape(-1, d)
@@ -253,10 +265,15 @@ z = np.zeros(N)
 
 while no_of_iterations < Nsamples:
     d_itr = 0
-    for alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0 in zip(
-            alpha0_d.reshape(-1, k), beta0_d.reshape(-1, k), alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
+    for  alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk in zip(
+            alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
             epsolon_d, var_test_d, e_ln_precision_d.reshape(-1, k), e_precision_d.reshape(-1, k), mk_d.reshape(-1, k),
-            sk_d.reshape(-1, k), m0_d.reshape(-1, k), s0_d.reshape(-1, k)):
+            sk_d.reshape(-1, k)):
+
+        alpha0 = alpha0_d[:, d_itr].reshape(-1)
+        beta0 = beta0_d[:, d_itr].reshape(-1)
+        m0 = m0_d[:, d_itr].reshape(-1)
+        s0 = sk_d[:, d_itr].reshape(-1)
         row_in_e = row_in_e_d[:, d_itr]
         x = X[:, d_itr]
         c = c.reshape(-1, k)
@@ -389,10 +406,10 @@ while no_of_iterations < Nsamples:
         var_test_den = fik.sum(axis=0)
 
         var_test = np.divide(var_test_num, var_test_den, out=np.zeros_like(var_test_num), where=var_test_den != 0)
-        print("Var num: ", var_test_num)
-        print("Var den: ", var_test_den)
-        print("Var test: ", var_test)
-        print("epsolon: ", epsolon)
+        # print("Var num: ", var_test_num)
+        # print("Var den: ", var_test_den)
+        # print("Var test: ", var_test)
+        # print("epsolon: ", epsolon)
         # epsolon = (fik * x_test.reshape(-1, 1)).sum(axis=0) / fik.sum(axis=0)
         # var_test = (fik * ((x_test - epsolon.reshape(-1, 1)) ** 2).T).sum(axis=0) / fik.sum(axis=0)
         var_test_d[d_itr] = var_test
@@ -423,7 +440,7 @@ while no_of_iterations < Nsamples:
         # return rnk
         d_itr+=1
 
-
+        print("Dimension: ", d_itr)
 
     """
     make changes
@@ -499,7 +516,7 @@ while no_of_iterations < Nsamples:
         p_indicators_prior[j, idx] = nij[idx] / (N - 1.0 + alpha) * likelihood_for_associated_data
 
     # stochastic indicator (we could have a new component)
-    c = np.hstack(draw_indicator(p_indicators_prior))
+    c = np.hstack(draw_indicator(np.nan_to_num(p_indicators_prior)))
 
     # sort out based on new stochastic indicators
     nij = np.sum(c == M)  # see if the *new* component has occupancy
@@ -519,8 +536,7 @@ while no_of_iterations < Nsamples:
 
         sk_d = np.concatenate((sk_d, new_sk.reshape(1, -1)))
         shape = np.concatenate((shape, np.reshape(np.asarray([2]), -1)))
-        print("M: ", M)
-        print("k: ", k)
+
 
         M = M + 1
         k = M
@@ -602,15 +618,15 @@ while no_of_iterations < Nsamples:
     if Nbad > 0:
         print("#################")
         print("Nbad > 0")
-        mk = np.delete(mk, badidx, axis=0)
-        sk = np.delete(sk, badidx, axis=0)
-        betak = np.delete(betak, badidx, axis=0)
-        alphak = np.delete(alphak, badidx, axis=0)
+        mk_d = np.delete(mk_d, badidx, axis=0)
+        sk_d = np.delete(sk_d, badidx, axis=0)
+        betak_d = np.delete(betak_d, badidx, axis=0)
+        alphak_d = np.delete(alphak_d, badidx, axis=0)
         shape = np.delete(shape, badidx, axis=0)
-        e_precision_ = np.delete(e_precision_, badidx, axis=0)
+        e_precision_d = np.delete(e_precision_d, badidx, axis=0)
         gammak = np.delete(gammak, badidx, axis=0)
         e_ln_pi = np.delete(e_ln_pi, badidx, axis=0)
-        e_ln_precision_ = np.delete(e_ln_precision_, badidx, axis=0)
+        e_ln_precision_d = np.delete(e_ln_precision_d, badidx, axis=0)
         e_x_mean_lambda_ = np.delete(e_x_mean_lambda_, badidx, axis=1)
         rnk = np.delete(rnk, badidx, axis=1)
         Nk = np.delete(Nk, badidx, axis=0)
@@ -628,7 +644,7 @@ while no_of_iterations < Nsamples:
 
     # recompute pi
     pi = n.astype(float) / np.sum(n)
-    print('mk: ', mk.shape)
+    # print('mk: ', mk.shape)
 
     pcnt = int(100.0 * no_of_iterations / float(Nsamples))
     if pcnt > oldpcnt:
@@ -637,15 +653,15 @@ while no_of_iterations < Nsamples:
 
     no_of_iterations += 1
     print(n)
-    result = []
-    rnk12 = list(rnk)
-    rnk12 = [list(i) for i in rnk]
-    for response in rnk12:
-        result.append(response.index(max(response)))
-    result = np.asarray(result)
-    pyplot.imshow(result.reshape(67, 100))
-    # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
-    # #     no_of_iterations) + ".png")
-    pyplot.show()
+    # result = []
+    # rnk12 = list(rnk)
+    # rnk12 = [list(i) for i in rnk]
+    # for response in rnk12:
+    #     result.append(response.index(max(response)))
+    # result = np.asarray(result)
+    # pyplot.imshow(result.reshape(67, 100))
+    # # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
+    # # #     no_of_iterations) + ".png")
+    # pyplot.show()
 
 # return Samp, X, c, n
