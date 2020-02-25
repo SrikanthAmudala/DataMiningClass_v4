@@ -137,8 +137,16 @@ class Samples:
 
 import cv2
 
-input_img_path = r"/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/datasets/testSample_copy.jpg"
-X = x = cv2.imread(input_img_path)
+input_img_path = r"/Users/Srikanth/PycharmProjects/COMP551_Projects/DataMiningClass_v4/IAGM_master/datasets/MVN_4components_diagonal_cov.csv"
+import pandas
+dataset_df = pandas.read_csv(input_img_path, header=None)
+dataset = dataset_df.values
+
+
+# X = x = cv2.imread(input_img_path)
+X = x = dataset
+
+X = x = (X - X.min())/(X.max() - X.min())
 original_shape = X.shape
 d = original_shape[-1]
 X = x = X.reshape(-1, d)
@@ -253,10 +261,15 @@ z = np.zeros(N)
 
 while no_of_iterations < Nsamples:
     d_itr = 0
-    for alpha0, beta0, alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk, m0, s0 in zip(
-            alpha0_d.reshape(-1, k), beta0_d.reshape(-1, k), alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
+    for  alphak, betak, w, epsolon, var_test, e_ln_precision_, e_precision_, mk, sk in zip(
+            alphak_d.reshape(-1, k), betak_d.reshape(-1, k), w_d,
             epsolon_d, var_test_d, e_ln_precision_d.reshape(-1, k), e_precision_d.reshape(-1, k), mk_d.reshape(-1, k),
-            sk_d.reshape(-1, k), m0_d.reshape(-1, k), s0_d.reshape(-1, k)):
+            sk_d.reshape(-1, k)):
+
+        alpha0 = alpha0_d[:, d_itr].reshape(-1)
+        beta0 = beta0_d[:, d_itr].reshape(-1)
+        m0 = m0_d[:, d_itr].reshape(-1)
+        s0 = sk_d[:, d_itr].reshape(-1)
         row_in_e = row_in_e_d[:, d_itr]
         x = X[:, d_itr]
         c = c.reshape(-1, k)
@@ -637,15 +650,15 @@ while no_of_iterations < Nsamples:
 
     no_of_iterations += 1
     print(n)
-    result = []
-    rnk12 = list(rnk)
-    rnk12 = [list(i) for i in rnk]
-    for response in rnk12:
-        result.append(response.index(max(response)))
-    result = np.asarray(result)
-    pyplot.imshow(result.reshape(67, 100))
-    # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
-    # #     no_of_iterations) + ".png")
-    pyplot.show()
+    # result = []
+    # rnk12 = list(rnk)
+    # rnk12 = [list(i) for i in rnk]
+    # for response in rnk12:
+    #     result.append(response.index(max(response)))
+    # result = np.asarray(result)
+    # pyplot.imshow(result.reshape(67, 100))
+    # # # pyplot.savefig(r"C:\Users\Sunny\PycharmProjects\DataMiningClass_v4\IGGMM_feature\output_eagle/" + str(
+    # # #     no_of_iterations) + ".png")
+    # pyplot.show()
 
 # return Samp, X, c, n
